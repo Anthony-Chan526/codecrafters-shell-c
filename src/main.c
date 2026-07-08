@@ -57,10 +57,10 @@ int main(int argc, char *argv[]) {
           dir = strtok(NULL, ":"); 
         }
         if (dir == NULL) {
-          printf("%s: not found\n", arg);
+          printf("%s: command not found\n", argv`);
         }
       } 
-    } else { printf("%s: command not found\n", input); }
+    } 
   }
 
   return 0;
