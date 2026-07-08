@@ -6,13 +6,24 @@ int main(int argc, char *argv[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
 
+  char input[1024];
+
   while (1) {
     printf("$ ");
-    char input[1024];
     fgets(input, sizeof(input), stdin);
     input[strlen(input) - 1] = '\0';
-    if (strcmp(input, "exit") == 0) { break; }
-    if (strncmp(input, "echo ", 5) == 0) { printf("%s\n", input + 5); }
+    char *builtin = strtok(str, " ");
+    char *arg = strtok(NULL, " ");
+    if (builtin == NULL) { continue; }
+    else if (strcmp(builtin, "exit") == 0) { break; }
+    else if (strcmp(builtin, "echo") == 0) { printf("%s\n", input + 5); }
+    else if (strcmp(builtin, "type") == 0) {
+      if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type")) {
+        printf("%s: not found", arg);
+      } else {
+        printf("%s is a ahell builtin", arg);
+      }
+    }
     else { printf("%s: command not found\n", input); }
   }
 
