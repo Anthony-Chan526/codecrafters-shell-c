@@ -5,6 +5,25 @@
 #include <limits.h>
 #include <sys/wait.h>
 
+int find_path(const *char arg, char *full_path) {
+  char *path = strdup(getenv("PATH"));
+  char *dir = strtok(path, ":");
+  char full_path[PATH_MAX];
+  while (dir != NULL) {
+    snprintf(full_path, sizeof(full_path), "%s/%s", dir, arg);
+    if (access(full_path, X_OK) == 0) {
+      break;
+    }
+    dir = strtok(NULL, ":"); 
+  }
+  free(path);
+  if (dir == NULL) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 int main(int argc, char *argv[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
@@ -55,7 +74,6 @@ int main(int argc, char *argv[]) {
             char *path = strdup(getenv("PATH"));
             char *dir = strtok(path, ":");
             char full_path[PATH_MAX];
-            int found = 0;
 
             while (dir != NULL) {
                 snprintf(full_path, sizeof(full_path), "%s/%s", dir, args[0]);
