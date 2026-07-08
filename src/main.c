@@ -41,11 +41,11 @@ int main(int argc, char *argv[]) {
         char *dir = strtok(path, ":");
         char full_path[PATH_MAX];
         while (dir != NULL) {
-          snprintf(full_path, sizeof(full_path), "%s/%s", dir, arg);
+          snprintf(full_path, sizeof(full_path), "%s/%s", dir, argv);
           if (access(full_path, X_OK) == 0) {
             pid_t pid = fork();
             if (pid == 0) {
-              execvp(full_path, arg);
+              execv(full_path, arg);
               perror("Execution failed");
               exit(EXIT_FAILURE);
             } else {
