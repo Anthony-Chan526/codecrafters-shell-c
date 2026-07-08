@@ -40,21 +40,12 @@ int main(int argc, char *argv[]) {
       if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type")) {
         printf("%s is a shell builtin\n", arg);
       } else {
-        char *path = strdup(getenv("PATH"));
-        char *dir = strtok(path, ":");
         char full_path[PATH_MAX];
-        while (dir != NULL) {
-          snprintf(full_path, sizeof(full_path), "%s/%s", dir, arg);
-          if (access(full_path, X_OK) == 0) {
-            printf("%s is %s\n", arg, full_path);
-            break;
-          }
-          dir = strtok(NULL, ":"); 
-        }
-        if (dir == NULL) {
+        if(find_path(arg, full_path)) {
+          printf("%s is %s\n", arg, full_path);
+        } else {
           printf("%s: not found\n", arg);
         }
-        free(path);
       }
     } else { 
             char input_copy[1024];
@@ -70,30 +61,19 @@ int main(int argc, char *argv[]) {
 
             if (args[0] == NULL) { continue; }
 
-            char *path = strdup(getenv("PATH"));
-            char *dir = strtok(path, ":");
             char full_path[PATH_MAX];
-
-            while (dir != NULL) {
-                snprintf(full_path, sizeof(full_path), "%s/%s", dir, args[0]);
-                if (access(full_path, X_OK) == 0) {
-                    pid_t pid = fork();
-                    if (pid == 0) {
-                        execv(full_path, args);
-                        perror("Execution failed");
-                        exit(EXIT_FAILURE);
-                    } else {
-                        waitpid(pid, NULL, 0);
-                    }
-                    break;
-                }
-                dir = strtok(NULL, ":"); 
+            if(find_path(args[0], full_path)) {
+              pid_t pid = fork();
+              if (pid == 0) {
+                  execv(full_path, args);
+                  perror("Execution failed");
+                  exit(EXIT_FAILURE);
+              } else {
+                  waitpid(pid, NULL, 0);
+              }
+            } else {
+              printf("%s: command not found\n", args[0]);
             }
-
-            if (dir == NULL) {
-                printf("%s: command not found\n", args[0]);
-            }
-            free(path);
         } 
     }
 
