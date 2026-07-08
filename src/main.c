@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
       if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type")) {
         printf("%s is a shell builtin\n", arg);
       } else {
-        char *path = strdup(gatenv("PATH"));
+        char *path = strdup(getenv("PATH"));
         char *dir = strtok(path, ":");
         char full_path[PATH_MAX];
         while (dir != NULL) {
