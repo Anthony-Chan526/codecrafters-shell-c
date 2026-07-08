@@ -60,7 +60,6 @@ int main(int argc, char *argv[]) {
             while (dir != NULL) {
                 snprintf(full_path, sizeof(full_path), "%s/%s", dir, args[0]);
                 if (access(full_path, X_OK) == 0) {
-                    found = 1;
                     pid_t pid = fork();
                     if (pid == 0) {
                         execv(full_path, args);
