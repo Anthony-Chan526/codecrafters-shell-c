@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <sys/wait.h>
 
-int find_path(const *char arg, char *full_path) {
+int find_path(const char *arg, char *full_path) {
   char *path = strdup(getenv("PATH"));
   char *dir = strtok(path, ":");
   char full_path[PATH_MAX];
