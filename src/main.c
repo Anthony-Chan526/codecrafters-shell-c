@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     printf("$ ");
     fgets(input, sizeof(input), stdin);
     input[strlen(input) - 1] = '\0';
-    char *builtin = strtok(str, " ");
+    char *builtin = strtok(input, " ");
     char *arg = strtok(NULL, " ");
     if (builtin == NULL) { continue; }
     else if (strcmp(builtin, "exit") == 0) { break; }
