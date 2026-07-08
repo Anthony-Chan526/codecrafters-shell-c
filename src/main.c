@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/wait.h>
 
 int main(int argc, char *argv[]) {
   // Flush after every printf
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]) {
           if (access(full_path, X_OK) == 0) {
             pid_t pid = fork();
             if (pid == 0) {
-              execv(full_path, arg);
+              execv(full_path, argv);
               perror("Execution failed");
               exit(EXIT_FAILURE);
             } else {
