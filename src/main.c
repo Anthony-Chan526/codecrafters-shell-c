@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     else if (strcmp(builtin, "exit") == 0) { break; }
     else if (strcmp(builtin, "echo") == 0) { printf("%s\n", arg); }
     else if (strcmp(builtin, "type") == 0) {
-      if (strcmp(arg, "echo") != 0 && strcmp(arg, "exit") != 0 && strcmp(arg, "type") != 0) {
+      if (strcmp(arg, "echo") && strcmp(arg, "exit") && strcmp(arg, "type")) {
         printf("%s: not found\n", arg);
       } else {
         printf("%s is a shell builtin\n", arg);
