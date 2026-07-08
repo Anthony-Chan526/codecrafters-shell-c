@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
       if (!strcmp(arg, "echo") && !strcmp(arg, "exit") && !strcmp(arg, "type")) {
         printf("%s: not found\n", arg);
       } else {
-        printf("%s is a ahell builtin\n", arg);
+        printf("%s is a shell builtin\n", arg);
       }
     }
     else { printf("%s: command not found\n", input); }
