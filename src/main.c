@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
           if (access(full_path, X_OK) == 0) {
             pid_t pid = fork();
             if (pid == 0) {
-              execvp(full_path, arg)
+              execvp(full_path, arg);
               perror("Execution failed");
               exit(EXIT_FAILURE);
             } else {
