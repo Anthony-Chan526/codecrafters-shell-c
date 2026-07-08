@@ -8,11 +8,11 @@ int main(int argc, char *argv[]) {
 
   while (1) {
     printf("$ ");
-    char command[1024];
-    fgets(command, sizeof(command), stdin);
-    command[strlen(command) - 1] = '\0';
-    printf("%s: command not found\n", command);
+    char input[1024];
+    fgets(input, sizeof(input), stdin);
+    input[strlen(input) - 1] = '\0';
     if (strcmp(input, "exit") == 0) { break; }
+    printf("%s: input not found\n", input);
   }
 
   return 0;
