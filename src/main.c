@@ -36,32 +36,50 @@ int main(int argc, char *argv[]) {
         if (dir == NULL) {
           printf("%s: not found\n", arg);
         }
+        free(path);
       }
-    } else {
-        char *path = strdup(getenv("PATH"));
-        char *dir = strtok(path, ":");
-        char full_path[PATH_MAX];
-        while (dir != NULL) {
-          snprintf(full_path, sizeof(full_path), "%s/%s", dir, argv);
-          if (access(full_path, X_OK) == 0) {
-            pid_t pid = fork();
-            if (pid == 0) {
-              execv(full_path, argv);
-              perror("Execution failed");
-              exit(EXIT_FAILURE);
-            } else {
-              waitpid(pid, NULL, 0);
-            }
-            break;
-          }
-          dir = strtok(NULL, ":"); 
-        }
-        if (dir == NULL) {
-          printf("%s: command not found\n", argv`);
-        }
-      } 
-    } 
-  }
+    } else { 
+            char input_copy[1024];
+            strcpy(input_copy, input);
 
-  return 0;
+            char *args[64];
+            int i = 0;
+            args[i] = strtok(input_copy, " ");
+            while (args[i] != NULL && i < 63) {
+                i++;
+                args[i] = strtok(NULL, " ");
+            }
+
+            if (args[0] == NULL) { continue; }
+
+            char *path = strdup(getenv("PATH"));
+            char *dir = strtok(path, ":");
+            char full_path[PATH_MAX];
+            int found = 0;
+
+            while (dir != NULL) {
+                snprintf(full_path, sizeof(full_path), "%s/%s", dir, args[0]);
+                if (access(full_path, X_OK) == 0) {
+                    found = 1;
+                    pid_t pid = fork();
+                    if (pid == 0) {
+                        execv(full_path, args);
+                        perror("Execution failed");
+                        exit(EXIT_FAILURE);
+                    } else {
+                        waitpid(pid, NULL, 0);
+                    }
+                    break;
+                }
+                dir = strtok(NULL, ":"); 
+            }
+
+            if (dir == NULL) {
+                printf("%s: command not found\n", args[0]);
+            }
+            free(path);
+        } 
+    }
+
+    return 0;
 }
