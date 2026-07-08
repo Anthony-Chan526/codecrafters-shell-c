@@ -36,8 +36,30 @@ int main(int argc, char *argv[]) {
           printf("%s: not found\n", arg);
         }
       }
-    }
-    else { printf("%s: command not found\n", input); }
+    } else {
+        char *path = strdup(getenv("PATH"));
+        char *dir = strtok(path, ":");
+        char full_path[PATH_MAX];
+        while (dir != NULL) {
+          snprintf(full_path, sizeof(full_path), "%s/%s", dir, arg);
+          if (access(full_path, X_OK) == 0) {
+            pid_t pid = fork();
+            if (pid == 0) {
+              execvp(full_path, arg)
+              perror("Execution failed");
+              exit(EXIT_FAILURE);
+            } else {
+              waitpid(pid, NULL, 0);
+            }
+            break;
+          }
+          dir = strtok(NULL, ":"); 
+        }
+        if (dir == NULL) {
+          printf("%s: not found\n", arg);
+        }
+      } 
+    } else { printf("%s: command not found\n", input); }
   }
 
   return 0;
