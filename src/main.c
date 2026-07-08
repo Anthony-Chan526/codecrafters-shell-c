@@ -17,9 +17,9 @@ int find_path(const char *arg, char *full_path) {
   }
   free(path);
   if (dir == NULL) {
-    return 1;
-  } else {
     return 0;
+  } else {
+    return 1;
   }
 }
 
