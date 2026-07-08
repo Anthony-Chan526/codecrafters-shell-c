@@ -8,7 +8,6 @@
 int find_path(const char *arg, char *full_path) {
   char *path = strdup(getenv("PATH"));
   char *dir = strtok(path, ":");
-  char full_path[PATH_MAX];
   while (dir != NULL) {
     snprintf(full_path, sizeof(full_path), "%s/%s", dir, arg);
     if (access(full_path, X_OK) == 0) {
