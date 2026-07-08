@@ -12,7 +12,8 @@ int main(int argc, char *argv[]) {
     fgets(input, sizeof(input), stdin);
     input[strlen(input) - 1] = '\0';
     if (strcmp(input, "exit") == 0) { break; }
-    printf("%s: command not found\n", input);
+    if (strcmp(input, "echo ", 5) == 0) { printf("%s/n", input + 5) }
+    else { printf("%s: command not found\n", input); }
   }
 
   return 0;
