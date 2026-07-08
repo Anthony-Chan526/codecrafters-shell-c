@@ -18,10 +18,10 @@ int main(int argc, char *argv[]) {
     else if (strcmp(builtin, "exit") == 0) { break; }
     else if (strcmp(builtin, "echo") == 0) { printf("%s\n", input + 5); }
     else if (strcmp(builtin, "type") == 0) {
-      if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type")) {
-        printf("%s: not found", arg);
+      if (!strcmp(arg, "echo") && !strcmp(arg, "exit") && !strcmp(arg, "type")) {
+        printf("%s: not found\n", arg);
       } else {
-        printf("%s is a ahell builtin", arg);
+        printf("%s is a ahell builtin\n", arg);
       }
     }
     else { printf("%s: command not found\n", input); }
