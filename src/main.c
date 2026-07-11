@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     else if (strncmp(input, "echo ", 5) == 0) { printf("%s\n", input + 5); }
     else if (strncmp(input, "type ", 5) == 0) {
       char *arg = input + 5;
-      if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type")) {
+      if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type") || !strcmp(arg, "pwd")) {
         printf("%s is a shell builtin\n", arg);
       } else {
         char full_path[PATH_MAX];
@@ -47,6 +47,10 @@ int main(int argc, char *argv[]) {
           printf("%s: not found\n", arg);
         }
       }
+    } else if (strcmp(input, "pwd") == 0) {
+      char full_path[PATH_MAX];
+      find_path(NULL, full_path);
+      printf("%s", full_path);
     } else { 
             char input_copy[1024];
             strcpy(input_copy, input);
