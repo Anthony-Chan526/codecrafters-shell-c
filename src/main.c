@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
         }
       }
     } else if (strcmp(input, "pwd") == 0) {
+      char cwd[1024]; 
       printf("%s", getcwd(cwd, sizeof(cwd)));
     } else { 
             char input_copy[1024];
