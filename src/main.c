@@ -48,9 +48,7 @@ int main(int argc, char *argv[]) {
         }
       }
     } else if (strcmp(input, "pwd") == 0) {
-      char full_path[PATH_MAX];
-      find_path(NULL, full_path);
-      printf("%s", full_path);
+      printf("%s", getcwd(cwd, sizeof(cwd)));
     } else { 
             char input_copy[1024];
             strcpy(input_copy, input);
