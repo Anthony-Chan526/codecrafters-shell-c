@@ -37,7 +37,11 @@ int main(int argc, char *argv[]) {
     else if (strncmp(input, "echo ", 5) == 0) { printf("%s\n", input + 5); }
     else if (strncmp(input, "type ", 5) == 0) {
       char *arg = input + 5;
-      if (!strcmp(arg, "echo") || !strcmp(arg, "exit") || !strcmp(arg, "type") || !strcmp(arg, "pwd")) {
+      if (!strcmp(arg, "echo") || 
+          !strcmp(arg, "exit") || 
+          !strcmp(arg, "type") || 
+          !strcmp(arg, "pwd")  ||
+          !strcmp(arg, "cd")) {
         printf("%s is a shell builtin\n", arg);
       } else {
         char full_path[PATH_MAX];
@@ -48,37 +52,45 @@ int main(int argc, char *argv[]) {
         }
       }
     } else if (strcmp(input, "pwd") == 0) {
-      char cwd[1024]; 
-      printf("%s\n", getcwd(cwd, sizeof(cwd)));
+      char cwd[1024];
+      if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("%s\n", cwd);
+      } else {
+        perror("pwd failed");
+      }
+    } else if (strncmp(input, "cd ", 3) == 0) {
+      char *new_dir = input + 3;
+      if(chdir(new_dir) == 0) { continue; }
+      else { perror("cd: %s: No such file or directory", new_dir); }
     } else { 
-            char input_copy[1024];
-            strcpy(input_copy, input);
+      char input_copy[1024];
+      strcpy(input_copy, input);
 
-            char *args[64];
-            int i = 0;
-            args[i] = strtok(input_copy, " ");
-            while (args[i] != NULL && i < 63) {
-                i++;
-                args[i] = strtok(NULL, " ");
-            }
+      char *args[64];
+      int i = 0;
+      args[i] = strtok(input_copy, " ");
+      while (args[i] != NULL && i < 63) {
+        i++;
+        args[i] = strtok(NULL, " ");
+      }
 
-            if (args[0] == NULL) { continue; }
+      if (args[0] == NULL) { continue; }
 
-            char full_path[PATH_MAX];
-            if(find_path(args[0], full_path)) {
-              pid_t pid = fork();
-              if (pid == 0) {
-                  execv(full_path, args);
-                  perror("Execution failed");
-                  exit(EXIT_FAILURE);
-              } else {
-                  waitpid(pid, NULL, 0);
-              }
-            } else {
-              printf("%s: command not found\n", args[0]);
-            }
-        } 
-    }
+      char full_path[PATH_MAX];
+      if(find_path(args[0], full_path)) {
+        pid_t pid = fork();
+        if (pid == 0) {
+          execv(full_path, args);
+          perror("Execution failed");
+          exit(EXIT_FAILURE);
+        } else {
+          waitpid(pid, NULL, 0);
+        }
+      } else {
+        printf("%s: command not found\n", args[0]);
+      }
+    } 
+  }
 
-    return 0;
+  return 0;
 }
