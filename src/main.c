@@ -60,7 +60,18 @@ int main(int argc, char *argv[]) {
       }
     } else if (strncmp(input, "cd ", 3) == 0) {
       char *new_dir = input + 3;
-      if(chdir(new_dir) != 0) {
+      char full_path[PATH_MAX];
+      if (new_dir[0] == '~') {
+        char *home = getenv("HOME");
+        if (new_dir[1] == '\0') { 
+          snprintf(full_path, sizeof(full_path), "%s", home);
+        } else {
+          snprintf(full_path, sizeof(full_path), "%s%s", home, new_dir + 1);
+        }
+      } else {
+        snprintf(full_path, sizeof(full_path), "%s", new_dir);
+      }
+      if (chdir(full_path) != 0) {
         printf("cd: %s: No such file or directory\n", new_dir);
       }
     } else { 
