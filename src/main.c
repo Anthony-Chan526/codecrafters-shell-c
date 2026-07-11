@@ -56,12 +56,13 @@ int main(int argc, char *argv[]) {
       if (getcwd(cwd, sizeof(cwd)) != NULL) {
         printf("%s\n", cwd);
       } else {
-        perror("pwd failed");
+        perror("pwd");
       }
     } else if (strncmp(input, "cd ", 3) == 0) {
       char *new_dir = input + 3;
-      if(chdir(new_dir) == 0) { continue; }
-      else { perror("cd: %s: No such file or directory", new_dir); }
+      if(chdir(new_dir) != 0) {
+        printf("cd: %s: No such file or directory\n", new_dir);
+      }
     } else { 
       char input_copy[1024];
       strcpy(input_copy, input);
