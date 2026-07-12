@@ -47,8 +47,14 @@ void parse_input(char *input, char **args, int max_args) {
         src++;
       } else if (*src == '\\' && !in_single_quote && !in_double_quote) {
         src++;
+        if (*src != '\0') { *dst++ = *src++; }
       } else if (*src == '\\' && in_double_quote) {
-        if (*(src + 1) == '\\' || *(src + 1) == '\"') { src++; }
+        if (*(src + 1) == '\\' || *(src + 1) == '\"') {
+          src++; 
+          *dst++ = *src++;
+        } else {
+          *dst++ = *src++;
+        }
       } else if (!in_single_quote && !in_double_quote && (*src == ' ' || *src == '\t')) { 
         break; 
       } else {
