@@ -37,11 +37,15 @@ void parse_input(char *input, char **args, int max_args) {
     args[count++] = src;
     char *dst = src;
     int in_single_quote = 0;
+    int in_double_quote = 0;
     while (*src != '\0') {
-      if (*src == '\'') {
+      if (*src == '\'' && !in_double_quote) {
         in_single_quote = !in_single_quote;
         src++;
-      } else if (!in_single_quote && (*src == ' ' || *src == '\t')) {
+      } else if (*src == '\"' && !in_single_quote) {
+        in_double_quote = !in_double_quote;
+        src++;
+      } else if (!in_single_quote && !in_double_quote && (*src == ' ' || *src == '\t')) {
         break;
       } else {
         *dst++ = *src++;
