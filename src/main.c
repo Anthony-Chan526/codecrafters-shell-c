@@ -23,43 +23,91 @@ int find_path(const char *arg, char *full_path) {
   }
 }
 
+void parse_input(char *input, char **args, int max_args) {
+  int count = 0;
+  char *src = input;
+
+  while (*src != '\0' && count < max_args - 1) {
+    while (*src == ' ' || *src == '\t') {
+      src++;
+    }
+
+    if (*src == '\0') { break; }
+
+    args[count++] = src;
+    char *dst = src;
+    int in_single_quote = 0;
+    while (*src != '\0') {
+      if (*src == '\'') {
+        in_single_quote = !in_single_quote;
+        src++;
+      } else if (!in_single_quote && (*src == ' ' || *src == '\t')) {
+        break;
+      } else {
+        *dst++ = *src++;
+      }
+    }
+    
+    if (*src != '\0') {
+      src++;
+    }
+    *dst = '\0';
+  }
+  args[count] = NULL;
+}
+
 int main(int argc, char *argv[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
 
+  char *args[64];
   char input[1024];
 
   while (1) {
     printf("$ ");
     fgets(input, sizeof(input), stdin);
     input[strlen(input) - 1] = '\0';
-    if (strcmp(input, "exit") == 0) { break; }
-    else if (strncmp(input, "echo ", 5) == 0) { printf("%s\n", input + 5); }
-    else if (strncmp(input, "type ", 5) == 0) {
-      char *arg = input + 5;
-      if (!strcmp(arg, "echo") || 
-          !strcmp(arg, "exit") || 
-          !strcmp(arg, "type") || 
-          !strcmp(arg, "pwd")  ||
-          !strcmp(arg, "cd")) {
-        printf("%s is a shell builtin\n", arg);
-      } else {
-        char full_path[PATH_MAX];
-        if(find_path(arg, full_path)) {
-          printf("%s is %s\n", arg, full_path);
-        } else {
-          printf("%s: not found\n", arg);
+    parse_input(input, args, 64);
+
+    if (args[0] == NULL) { continue; }
+
+    else if (strcmp(args[0], "exit") == 0) { break; }
+    
+    else if (strcmp(args[0], "echo") == 0) {
+      for (int i = 1; args[i] != NULL; i++) {
+        printf("%s", args[i]);
+        if (args[i + 1] != NULL) {
+          printf(" ");
         }
       }
-    } else if (strcmp(input, "pwd") == 0) {
+      printf("\n");
+    
+    } else if (strcmp(args[0], "type") == 0) {
+      if (!strcmp(args[1], "echo") || 
+          !strcmp(args[1], "exit") || 
+          !strcmp(args[1], "type") || 
+          !strcmp(args[1], "pwd")  ||
+          !strcmp(args[1], "cd")) {
+        printf("%s is a shell builtin\n", args[1]);
+      } else {
+        char full_path[PATH_MAX];
+        if(find_path(args[1], full_path)) {
+          printf("%s is %s\n", arg, full_path);
+        } else {
+          printf("%s: not found\n", args[1]);
+        }
+      }
+
+    } else if (strcmp(args[0], "pwd") == 0) {
       char cwd[1024];
       if (getcwd(cwd, sizeof(cwd)) != NULL) {
         printf("%s\n", cwd);
       } else {
         perror("pwd");
       }
-    } else if (strncmp(input, "cd ", 3) == 0) {
-      char *new_dir = input + 3;
+
+    } else if (strcmp(args[0], "cd") == 0) {
+      char *new_dir = args[1];
       char full_path[PATH_MAX];
       if (new_dir[0] == '~') {
         char *home = getenv("HOME");
@@ -74,20 +122,8 @@ int main(int argc, char *argv[]) {
       if (chdir(full_path) != 0) {
         printf("cd: %s: No such file or directory\n", new_dir);
       }
+
     } else { 
-      char input_copy[1024];
-      strcpy(input_copy, input);
-
-      char *args[64];
-      int i = 0;
-      args[i] = strtok(input_copy, " ");
-      while (args[i] != NULL && i < 63) {
-        i++;
-        args[i] = strtok(NULL, " ");
-      }
-
-      if (args[0] == NULL) { continue; }
-
       char full_path[PATH_MAX];
       if(find_path(args[0], full_path)) {
         pid_t pid = fork();
