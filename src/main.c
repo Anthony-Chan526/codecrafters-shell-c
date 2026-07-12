@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
       } else {
         char full_path[PATH_MAX];
         if(find_path(args[1], full_path)) {
-          printf("%s is %s\n", arg, full_path);
+          printf("%s is %s\n", args[1], full_path);
         } else {
           printf("%s: not found\n", args[1]);
         }
