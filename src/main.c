@@ -49,7 +49,10 @@ void parse_input(char *input, char **args, int max_args) {
         src++;
         if (*src != '\0') { *dst++ = *src++; }
       } else if (*src == '\\' && in_double_quote){
-        if (*src == '\"' || *src == '\\') { src++; }
+        if (*(src + 1) == '\"' || *(src + 1) == '\\') {
+          src++; 
+          *dst++ = *src++;
+        }
       } else if (!in_single_quote && !in_double_quote && (*src == ' ' || *src == '\t')) {
         break;
       } else {
