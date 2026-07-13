@@ -175,9 +175,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "%s: command not found\n", args[0]);
       }
     } 
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
   }
-
-  dup2(saved_stdout, STDOUT_FILENO);
-  close(saved_stdout);
   return 0;
 }
