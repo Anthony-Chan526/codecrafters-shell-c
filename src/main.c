@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/wait.h>
-#include <functl.h>
+#include <fcntl.h>
 
 int find_path(const char *arg, char *full_path) {
   char *path = strdup(getenv("PATH"));
