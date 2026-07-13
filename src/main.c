@@ -75,7 +75,7 @@ int handle_redirection(char **args) {
   for (int i = 0; args[i] != NULL; i++) {
     if (strcmp(args[i], ">") == 0 || strcmp(args[i], "1>") == 0) {
       char *filename = args[i + 1];
-      if(!filename) { return -1; }
+      if(!filename) { return 1; }
       int file_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
       dup2(file_fd, STDOUT_FILENO);
       close(file_fd);
@@ -97,6 +97,7 @@ int main(int argc, char *argv[]) {
     fgets(input, sizeof(input), stdin);
     input[strlen(input) - 1] = '\0';
     parse_input(input, args, 64);
+    int error = handle_redirection(args); 
 
     if (args[0] == NULL) { continue; }
 
