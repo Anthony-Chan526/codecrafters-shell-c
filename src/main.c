@@ -71,7 +71,7 @@ void parse_input(char *input, char **args, int max_args) {
   args[count] = NULL;
 }
 
-int handle_redirection(**args) {
+int handle_redirection(char **args) {
   for (int i = 0; args[i] != NULL; i++) {
     if (strcmp(args[i], ">") == 0 || strcmp(args[i], "1>") == 0) {
       char *filename = args[i + 1];
