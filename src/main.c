@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/wait.h>
+#include <functl.h>
 
 int find_path(const char *arg, char *full_path) {
   char *path = strdup(getenv("PATH"));
@@ -70,6 +71,20 @@ void parse_input(char *input, char **args, int max_args) {
   args[count] = NULL;
 }
 
+int handle_redirection(**args) {
+  for (int i = 0; args[i] != NULL; i++) {
+    if (strcmp(args[i], ">") == 0 || strcmp(args[i], "1>") == 0) {
+      char *filename = args[i + 1];
+      if(!filename) { return -1; }
+    }
+    int file_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    dup2(file_fd, STDOUT_FILENO);
+    close(file_fd);
+    return 0;
+  }
+  return 0;
+} 
+
 int main(int argc, char *argv[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
@@ -97,18 +112,18 @@ int main(int argc, char *argv[]) {
       printf("\n");
     
     } else if (strcmp(args[0], "type") == 0) {
-      if (!strcmp(args[1], "echo") || 
-          !strcmp(args[1], "exit") || 
-          !strcmp(args[1], "type") || 
-          !strcmp(args[1], "pwd")  ||
-          !strcmp(args[1], "cd")) {
+      if (strcmp(args[1], "echo") == 0 || 
+          strcmp(args[1], "exit") == 0 || 
+          strcmp(args[1], "type") == 0 || 
+          strcmp(args[1], "pwd")  == 0 ||
+          strcmp(args[1], "cd") == 0) {
         printf("%s is a shell builtin\n", args[1]);
       } else {
         char full_path[PATH_MAX];
         if(find_path(args[1], full_path)) {
           printf("%s is %s\n", args[1], full_path);
         } else {
-          printf("%s: not found\n", args[1]);
+          fprintf(stderr, "%s: not found\n", args[1]);
         }
       }
 
@@ -134,7 +149,7 @@ int main(int argc, char *argv[]) {
         snprintf(full_path, sizeof(full_path), "%s", new_dir);
       }
       if (chdir(full_path) != 0) {
-        printf("cd: %s: No such file or directory\n", new_dir);
+        fprintf(stderr, "cd: %s: No such file or directory\n", new_dir);
       }
 
     } else { 
@@ -149,7 +164,7 @@ int main(int argc, char *argv[]) {
           waitpid(pid, NULL, 0);
         }
       } else {
-        printf("%s: command not found\n", args[0]);
+        fprintf(stderr, "%s: command not found\n", args[0]);
       }
     } 
   }
