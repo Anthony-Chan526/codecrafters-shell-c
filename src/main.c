@@ -92,14 +92,19 @@ int main(int argc, char *argv[]) {
 
   char *args[64];
   char input[1024];
-  int saved_stdout = dup(STDOUT_FILENO);
 
   while (1) {
     printf("$ ");
     fgets(input, sizeof(input), stdin);
     input[strlen(input) - 1] = '\0';
     parse_input(input, args, 64);
+    int saved_stdout = dup(STDOUT_FILENO);
     int redirect_error = handle_redirection(args); 
+    if(redirect_error) {
+      fprintf(stderr, ">: redirection error\n");
+      close(saved_stdout);
+      continue;
+    }
 
     if (args[0] == NULL) { continue; }
 
@@ -173,5 +178,6 @@ int main(int argc, char *argv[]) {
   }
 
   dup2(saved_stdout, STDOUT_FILENO);
+  close(saved_stdout);
   return 0;
 }
