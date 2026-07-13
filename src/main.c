@@ -79,6 +79,7 @@ int handle_redirection(char **args) {
       int file_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
       dup2(file_fd, STDOUT_FILENO);
       close(file_fd);
+      args[i] = NULL;
       return 0;
     }
   }
