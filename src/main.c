@@ -81,6 +81,14 @@ int handle_redirection(char **args) {
       close(file_fd);
       args[i] = NULL;
       return 0;
+    } else if (strcmp(args[i], "2>") == 0) {
+      char *filename = args[i + 1];
+      if(!filename) { return 1; }
+      int file_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      dup2(file_fd, STDERR_FILENO);
+      close(file_fd);
+      args[i] = NULL;
+      return 0;
     }
   }
   return 0;
@@ -99,10 +107,12 @@ int main(int argc, char *argv[]) {
     input[strlen(input) - 1] = '\0';
     parse_input(input, args, 64);
     int saved_stdout = dup(STDOUT_FILENO);
+    int saved_stderr = dup(STDERR_FILENO);
     int redirect_error = handle_redirection(args); 
     if(redirect_error) {
       fprintf(stderr, ">: redirection error\n");
       close(saved_stdout);
+      close(saved_stderr);
       continue;
     }
 
@@ -174,9 +184,12 @@ int main(int argc, char *argv[]) {
       } else {
         fprintf(stderr, "%s: command not found\n", args[0]);
       }
-    } 
+    }
+     
     dup2(saved_stdout, STDOUT_FILENO);
+    dup2(saved_stderr, STDERR_FILENO);
     close(saved_stdout);
+    close(saved_stderr);
   }
   return 0;
 }
