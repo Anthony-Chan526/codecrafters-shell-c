@@ -68,7 +68,7 @@ char *command_generator(const char *text, int state) {
               }
             }
           }
-          close(dir);
+          closedir(dir);
         }
         dir_path = strtok(NULL, ":");
       }
