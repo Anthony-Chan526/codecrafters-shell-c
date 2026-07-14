@@ -41,9 +41,9 @@ char *command_generator(const char *text, int state) {
     clear_matches();
     int len = strlen(text);
     
-    for (int i = 0; builtins[i] != NULL; i++) {
-      if (strncmp(builtins[i], text, len) == 0) {
-        add_matches(builtins[i]);
+    for (int i = 0; commands[i] != NULL; i++) {
+      if (strncmp(commands[i], text, len) == 0) {
+        add_matches(commands[i]);
       }
     }
 
