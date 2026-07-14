@@ -53,7 +53,7 @@ char *command_generator(const char *text, int state) {
       char *dir_path = strtok(path_copy, ":");
 
       while (dir_path != NULL) {
-        DIR *dir = opedir(dir_path);
+        DIR *dir = opendir(dir_path);
         if (dir) {
           struct dirent *entry;
           while ((entry = readdir(dir)) != NULL) {
