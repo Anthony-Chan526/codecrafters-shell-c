@@ -5,6 +5,32 @@
 #include <limits.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
+char *builtins[] = {"exit", "echo", "type", "pwd", "cd", NULL};
+
+char *builtin_generator(const char *text, int state) {
+    static int list_index, len;
+    char *name;
+
+    if (!state) {
+        list_index = 0;
+        len = strlen(text);
+    }
+
+    while ((name = builtins[list_index++])) {
+        if (strncmp(name, text, len) == 0) {
+            return strdup(name);
+        }
+    }
+    return NULL;
+}
+
+char **builtin_completion(const char *text, int start, int end) {
+    rl_attempted_completion_over = 1; 
+    return rl_completion_matches(text, builtin_generator);
+}
 
 int find_path(const char *arg, char *full_path) {
   char *path = strdup(getenv("PATH"));
@@ -116,6 +142,7 @@ int main(int argc, char *argv[]) {
 
   char *args[64];
   char input[1024];
+  rl_attempted_completion_function = command_completion;
 
   while (1) {
     printf("$ ");
