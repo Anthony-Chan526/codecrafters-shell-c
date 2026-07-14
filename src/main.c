@@ -8,9 +8,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-char *builtins[] = {"exit", "echo", "type", "pwd", "cd", NULL};
+char *commands[] = {"exit", "echo", "type", "pwd", "cd", NULL};
 
-char *builtin_generator(const char *text, int state) {
+char *command_generator(const char *text, int state) {
     static int list_index, len;
     char *name;
 
@@ -19,7 +19,7 @@ char *builtin_generator(const char *text, int state) {
         len = strlen(text);
     }
 
-    while ((name = builtins[list_index++])) {
+    while ((name = commands[list_index++])) {
         if (strncmp(name, text, len) == 0) {
             return strdup(name);
         }
@@ -27,9 +27,9 @@ char *builtin_generator(const char *text, int state) {
     return NULL;
 }
 
-char **builtin_completion(const char *text, int start, int end) {
+char **command_completion(const char *text, int start, int end) {
     rl_attempted_completion_over = 1; 
-    return rl_completion_matches(text, builtin_generator);
+    return rl_completion_matches(text, command_generator);
 }
 
 int find_path(const char *arg, char *full_path) {
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 
   char *args[64];
   char input[1024];
-  rl_attempted_completion_function = builtin_completion;
+  rl_attempted_completion_function = command_completion;
 
   while (1) {
     char *line = readline("$ ");
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
     strncpy(input, line, sizeof(input) - 1);
     input[sizeof(input) - 1] = '\0';
     free(line);
-    
+
     parse_input(input, args, 64);
     int saved_stdout = dup(STDOUT_FILENO);
     int saved_stderr = dup(STDERR_FILENO);
