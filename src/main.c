@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 
   char *args[64];
   char input[1024];
-  rl_attempted_completion_function = command_completion;
+  rl_attempted_completion_function = builtin_completion;
 
   while (1) {
     printf("$ ");
