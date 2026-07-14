@@ -47,9 +47,9 @@ char *command_generator(const char *text, int state) {
       }
     }
 
-    char *path_env = getenv(PATH);
+    char *path_env = getenv("PATH");
     if (path_env) {
-      char *path_copy = strdup(path_eenv);
+      char *path_copy = strdup(path_env);
       char *dir_path = strtok(path_copy, ":");
 
       while (dir_path != NULL) {
