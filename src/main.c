@@ -145,9 +145,14 @@ int main(int argc, char *argv[]) {
   rl_attempted_completion_function = builtin_completion;
 
   while (1) {
-    printf("$ ");
-    fgets(input, sizeof(input), stdin);
-    input[strlen(input) - 1] = '\0';
+    char *line = readline("$ ");
+    if (line == NULL) { 
+      break; 
+    }
+    strncpy(input, line, sizeof(input) - 1);
+    input[sizeof(input) - 1] = '\0';
+    free(line);
+    
     parse_input(input, args, 64);
     int saved_stdout = dup(STDOUT_FILENO);
     int saved_stderr = dup(STDERR_FILENO);
