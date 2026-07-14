@@ -10,26 +10,84 @@
 
 char *commands[] = {"exit", "echo", "type", "pwd", "cd", NULL};
 
+static char **command_matches = NULL;
+static int match_count = 0;
+static int current_match_idx = 0;
+
+void clear_matches() {
+  if (command_matches) {
+    for (int i = 0; i < match_count; i++) {
+      free(command_matches[i]);
+    }
+    free(command_matches);
+    command_matches = NULL;
+  }
+  match_count = 0;
+  current_match_idx = 0;
+}
+
+void add_matches(const char *name) {
+  for (int i = 0; i < match_count; i++) {
+    if (strcmp(command_matches[i], name) == 0) return;
+  }
+  command_matches = realloc(command_matches, (match_count + 1) * sizeof(char*));
+  command_matches[match_count++] = strdup(name);
+}
+
 char *command_generator(const char *text, int state) {
-    static int list_index, len;
-    char *name;
-
-    if (!state) {
-        list_index = 0;
-        len = strlen(text);
+  if (!state) {
+    clear_matches();
+    int len = strlen(text);
+    
+    for (int i = 0; builtins[i] != NULL; i++) {
+      if (strncmp(builtins[i], text, len) == 0) {
+        add_matches(builtins[i]);
+      }
     }
 
-    while ((name = commands[list_index++])) {
-        if (strncmp(name, text, len) == 0) {
-            return strdup(name);
+    char *path_env = getenv(PATH);
+    if (path_env) {
+      char *path_copy = strdup(path_eenv);
+      char *dir_path = strtok(path_copy, ":");
+
+      while (dir_path != NULL) {
+        DIR *dir = opedir(dir_path);
+        if (dir) {
+          struct dirent *entry;
+          while ((entry = readdir(dir)) != NULL) {
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+              continue;
+            }
+
+            if (strncmp(entry->d_name, text, len) == 0) {
+              char full_path[PATH_MAX];
+              snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
+              struct stat st;
+              if (access(full_path, X_OK) == 0 && stat(full_path, &st) == 0 && S_ISREG(st.st_mode)) {
+                add_matches(entry->d_name);
+              }
+            }
+          }
+          close(dir);
         }
+        dir_path = strtok(NULL, ":");
+      }
+      free(path_copy);
     }
-    return NULL;
+  }
+  if (current_match_idx < match_count) {
+        return strdup(command_matches[current_match_idx++]);
+  }
+  return NULL;
 }
 
 char **command_completion(const char *text, int start, int end) {
-    rl_attempted_completion_over = 1; 
-    return rl_completion_matches(text, command_generator);
+    if (start == 0) {
+        rl_attempted_completion_over = 1;
+        return rl_completion_matches(text, command_generator);
+    }
+    rl_attempted_completion_over = 0;
+    return NULL;
 }
 
 int find_path(const char *arg, char *full_path) {
