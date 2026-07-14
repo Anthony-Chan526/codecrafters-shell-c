@@ -80,6 +80,7 @@ char *command_generator(const char *text, int state) {
   if (current_match_idx < match_count) {
         return strdup(command_matches[current_match_idx++]);
   }
+  clear_command_matches();
   return NULL;
 }
 
