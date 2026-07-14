@@ -75,7 +75,7 @@ int handle_redirection(char **args) {
   for (int i = 0; args[i] != NULL; i++) {
     if (strcmp(args[i], ">") == 0 || strcmp(args[i], "1>") == 0) {
       char *filename = args[i + 1];
-      if(!filename) { return 1; }
+      if(!filename) { fprintf(stderr, ">: redirection error\n"); return 1; }
       int file_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
       dup2(file_fd, STDOUT_FILENO);
       close(file_fd);
@@ -83,8 +83,24 @@ int handle_redirection(char **args) {
       return 0;
     } else if (strcmp(args[i], "2>") == 0) {
       char *filename = args[i + 1];
-      if(!filename) { return 1; }
+      if(!filename) { fprintf(stderr, "2>: redirection error\n"); return 1; }
       int file_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      dup2(file_fd, STDERR_FILENO);
+      close(file_fd);
+      args[i] = NULL;
+      return 0;
+    } else if (strcmp(args[i], ">>") == 0 || strcmp(args[i], "1>>") == 0) {
+      char *filename = args[i + 1];
+      if(!filename) { fprintf(stderr, ">>: redirection error\n"); return 1; }
+      int file_fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+      dup2(file_fd, STDOUT_FILENO);
+      close(file_fd);
+      args[i] = NULL;
+      return 0;
+    } else if (strcmp(args[i], "2>>") == 0 ) {
+      char *filename = args[i + 1];
+      if(!filename) { fprintf(stderr, "2>>: redirection error\n"); return 1; }
+      int file_fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
       dup2(file_fd, STDERR_FILENO);
       close(file_fd);
       args[i] = NULL;
@@ -110,7 +126,6 @@ int main(int argc, char *argv[]) {
     int saved_stderr = dup(STDERR_FILENO);
     int redirect_error = handle_redirection(args); 
     if(redirect_error) {
-      fprintf(stderr, ">: redirection error\n");
       close(saved_stdout);
       close(saved_stderr);
       continue;
