@@ -143,7 +143,7 @@ char *script_generator(const char *text, int state) {
     char line[256];
     int len = strlen(text);
     while (fgets(line, sizeof(line), stream)) {
-      line[strcspn(line, "\n")] = "\0";
+      line[strcspn(line, "\n")] = '\0';
       if (strncmp(line, text, len) == 0) {
         script_matches = realloc(script_matches, (script_match_count + 1) * sizeof(char *));
         script_matches[script_match_count++] = strdup(line);
