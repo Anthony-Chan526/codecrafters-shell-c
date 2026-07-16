@@ -310,7 +310,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "complete: %s: no completion specification\n", args[2]);
           } 
         }
-      } else if (strcmp(args[1], "-C") == 0)
+      } else if (strcmp(args[1], "-C") == 0) {
         int found_idx = -1; 
         for (int i = 0; i < completion_count; i++) {
           if (strcmp(completion_registry[i].command_name, args[3]) == 0) {
@@ -327,6 +327,7 @@ int main(int argc, char *argv[]) {
             completion_count++;
           }
         }
+      }
 
     } else { 
       char full_path[PATH_MAX];
