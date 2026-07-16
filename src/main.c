@@ -30,14 +30,14 @@ static int script_match_idx = 0;
 
 void clear_matches(char ***matches, int *count, int *idx) {
   if (matches) {
-    for (int i = 0; i < count; i++) {
-      free(matches[i]);
+    for (int i = 0; i < *count; i++) {
+      free((*matches)[i]);
     }
-    free(matches);
-    matches = NULL;
+    free(*matches);
+    *matches = NULL;
   }
-  count = 0;
-  idx = 0;
+  if (count) { *count = 0; }
+  if (idx) { *idx = 0; }
 }
 
 void add_matches(const char *name) {
@@ -146,7 +146,6 @@ char *script_generator(const char *text, int state) {
         break;
       }
     }
-    free(line_copy);
     if(script_path == NULL) { return NULL; }
     
     int pipe_fds[2];
