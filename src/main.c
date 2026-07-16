@@ -296,10 +296,9 @@ int main(int argc, char *argv[]) {
                     completion_registry[i].command_name);
           }
         } else {
-          char *target = args[2];
           int i;
           for (i = 0; i < completion_count; i++) {
-            if (strcmp(completion_registry[i].command_name, target) == 0) {
+            if (strcmp(completion_registry[i].command_name, args[2]) == 0) {
               printf("complete -C '%s' %s\n", 
                       completion_registry[i].completer_script, 
                       completion_registry[i].command_name);
@@ -317,15 +316,15 @@ int main(int argc, char *argv[]) {
             found_idx = i;
             break;
           }
+        }  
           
-          if (found_idx != -1) {
-            free(completion_registry[found_idx].completer_script);
-            completion_registry[found_idx].completer_script = strdup(args[2]);
-          } else {
-            completion_registry[completion_count].command_name = strdup(args[3]);
-            completion_registry[completion_count].completer_script = strdup(args[2]);
-            completion_count++;
-          }
+        if (found_idx != -1) {
+          free(completion_registry[found_idx].completer_script);
+          completion_registry[found_idx].completer_script = strdup(args[2]);
+        } else {
+          completion_registry[completion_count].command_name = strdup(args[3]);
+          completion_registry[completion_count].completer_script = strdup(args[2]);
+          completion_count++;
         }
       }
 
