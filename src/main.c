@@ -96,7 +96,7 @@ char *command_generator(const char *text, int state) {
   return NULL;
 }
 
-int get_completion_context(const char *cmd, char *text, char *prev_word, int max_len) {
+int get_completion_context(char *cmd, const char *text, char *prev_word, int max_len) {
   cmd[0] = '\0';
   prev_word[0] = '\0';
   char line_up_to_cursor[1024];
