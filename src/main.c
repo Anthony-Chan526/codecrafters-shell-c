@@ -278,8 +278,11 @@ int main(int argc, char *argv[]) {
       if (chdir(full_path) != 0) {
         fprintf(stderr, "cd: %s: No such file or directory\n", new_dir);
       }
-  
-      
+    
+    } else if(strcmp(args[0], "complete") == 0) {  
+      if(strcmp(args[1], "-p") == 0) {
+        fprintf(stderr, "complete: %s: no completion specification", args[2]);
+      }
 
     } else { 
       char full_path[PATH_MAX];
