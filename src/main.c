@@ -437,10 +437,22 @@ int main(int argc, char *words[]) {
           completion_count++;
         }
       } else if (strcmp(args[1], "-r") == 0) {
-        for (int i = 0; i < completion_count; i++) {
-          if (strcmp(completion_registry[i].command_name, args[3]) == 0) {
+        if (args[2] == NULL) {
+          for (int i = 0; i < completion_count; i++) {
             free(completion_registry[i].command_name);
             free(completion_registry[i].completer_script);
+          }
+        } else {
+          for (int i = 0; i < completion_count; i++) {
+            if (strcmp(completion_registry[i].command_name, args[2]) == 0) {
+              free(completion_registry[i].command_name);
+              free(completion_registry[i].completer_script);
+              for (int j = i; j < completion_count - 1; j++) {
+                completion_registry[j] = completion_registry[j + 1];
+              }
+              completion_count--;
+              break;
+            }
           }
         }  
       }
