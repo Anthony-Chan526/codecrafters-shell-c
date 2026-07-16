@@ -242,7 +242,8 @@ int main(int argc, char *argv[]) {
           strcmp(args[1], "exit") == 0 || 
           strcmp(args[1], "type") == 0 || 
           strcmp(args[1], "pwd")  == 0 ||
-          strcmp(args[1], "cd") == 0) {
+          strcmp(args[1], "cd") == 0   ||
+          strcmp(args[1], "complete") == 0) {
         printf("%s is a shell builtin\n", args[1]);
       } else {
         char full_path[PATH_MAX];
@@ -277,6 +278,9 @@ int main(int argc, char *argv[]) {
       if (chdir(full_path) != 0) {
         fprintf(stderr, "cd: %s: No such file or directory\n", new_dir);
       }
+    
+    } else if(strcmp(args[1], "complete") == 0){
+      
 
     } else { 
       char full_path[PATH_MAX];
