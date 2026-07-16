@@ -123,7 +123,7 @@ int get_completion_context(char *cmd, const char *text, char *prev_word, int max
     }
   } else {
     if (word_count >= 1) {
-      strncpy(prev_word, words[word_count = 1], max_len - 1);
+      strncpy(prev_word, words[word_count - 1], max_len - 1);
     } else {
       prev_word[0] = '\0';
     }
