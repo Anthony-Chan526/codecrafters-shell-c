@@ -24,16 +24,20 @@ static char **command_matches = NULL;
 static int match_count = 0;
 static int current_match_idx = 0;
 
-void clear_matches() {
-  if (command_matches) {
-    for (int i = 0; i < match_count; i++) {
-      free(command_matches[i]);
+static char **script_matches = NULL;
+static int script_match_count = 0;
+static int script_match_idx = 0;
+
+void clear_matches(***matches, *count, *idx) {
+  if (matches) {
+    for (int i = 0; i < count; i++) {
+      free(matches[i]);
     }
-    free(command_matches);
-    command_matches = NULL;
+    free(matches);
+    matches = NULL;
   }
-  match_count = 0;
-  current_match_idx = 0;
+  count = 0;
+  idx = 0;
 }
 
 void add_matches(const char *name) {
@@ -46,7 +50,7 @@ void add_matches(const char *name) {
 
 char *command_generator(const char *text, int state) {
   if (!state) {
-    clear_matches();
+    clear_matches(&command_matches, &match_count, &current_match_idx);
     int len = strlen(text);
     
     for (int i = 0; commands[i] != NULL; i++) {
@@ -88,29 +92,13 @@ char *command_generator(const char *text, int state) {
   if (current_match_idx < match_count) {
         return strdup(command_matches[current_match_idx++]);
   }
-  clear_matches();
+  clear_matches(&command_matches, &match_count, &current_match_idx);
   return NULL;
-}
-
-static char **script_matches = NULL;
-static int script_match_count = 0;
-static int script_match_idx = 0;
-
-void clear_script_matches() {
-  if (script_matches) {
-    for (int i = 0; i < script_match_count; i++) {
-      free(script_matches[i]);
-    }
-    free(script_matches);
-    script_matches = NULL;
-  }
-  script_match_count = 0;
-  script_match_idx = 0;
 }
 
 char *script_generator(const char *text, int state) {
   if (!state) {
-    clear_script_matches();
+    clear_matches(&script_matches, &script_match_count, &script_match_idx);
     char *line_copy = strdup(rl_line_buffer);
     char *cmd = strtok(line_copy, " \t");
     char *script_path = NULL;
@@ -155,7 +143,7 @@ char *script_generator(const char *text, int state) {
   if (script_match_idx < script_match_count) {
     return strdup(script_matches[script_match_idx++]);
   }
-  clear_matches;
+  clear_matches(&script_matches, &script_match_count, &script_match_idx);
   return NULL;
 }
 
