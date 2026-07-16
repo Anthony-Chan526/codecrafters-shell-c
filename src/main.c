@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete", NULL};
+char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete", "jobs", NULL};
 
 typedef struct {
   char *command_name;
@@ -359,9 +359,10 @@ int main(int argc, char *words[]) {
       if (strcmp(args[1], "echo") == 0 || 
           strcmp(args[1], "exit") == 0 || 
           strcmp(args[1], "type") == 0 || 
-          strcmp(args[1], "pwd")  == 0 ||
-          strcmp(args[1], "cd") == 0   ||
-          strcmp(args[1], "complete") == 0) {
+          strcmp(args[1], "pwd") == 0 ||
+          strcmp(args[1], "cd") == 0 ||
+          strcmp(args[1], "complete") == 0 ||
+          strcmp(args[1], "jobs") == 0) {
         printf("%s is a shell builtin\n", args[1]);
       } else {
         char full_path[PATH_MAX];
@@ -456,6 +457,9 @@ int main(int argc, char *words[]) {
           }
         }  
       }
+
+    } else {
+      continue;
 
     } else { 
       char full_path[PATH_MAX];
