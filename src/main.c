@@ -315,7 +315,7 @@ int handle_redirection(char **args) {
   return 0;
 } 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *words[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
 
@@ -436,6 +436,13 @@ int main(int argc, char *argv[]) {
           completion_registry[completion_count].completer_script = strdup(args[2]);
           completion_count++;
         }
+      } else if (strcmp(args[1], "-r") == 0) {
+        for (int i = 0; i < completion_count; i++) {
+          if (strcmp(completion_registry[i].command_name, args[3]) == 0) {
+            free(completion_registry[i].command_name);
+            free(completion_registry[i].completer_script);
+          }
+        }  
       }
 
     } else { 
