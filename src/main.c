@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-char *commands[] = {"exit", "echo", "type", "pwd", "cd", NULL};
+char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete" NULL};
 
 static char **command_matches = NULL;
 static int match_count = 0;
@@ -278,8 +278,7 @@ int main(int argc, char *argv[]) {
       if (chdir(full_path) != 0) {
         fprintf(stderr, "cd: %s: No such file or directory\n", new_dir);
       }
-    
-    } else if(strcmp(args[1], "complete") == 0){
+  
       
 
     } else { 
