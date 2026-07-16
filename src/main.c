@@ -96,11 +96,49 @@ char *command_generator(const char *text, int state) {
   return NULL;
 }
 
+int get_completion_context(const char *cmd, char *text, char *prev_word, int max_len) {
+  cmd[0] = '\0';
+  prev_word[0] = '\0';
+  char line_up_to_cursor[1024];
+  if (rl_point >= (int)sizeof(line_up_to_cursor)) { return 0; }
+  strncpy(line_up_to_cursor, rl_line_buffer, rl_point);
+  line_up_to_cursor[rl_point] = '\0';
+
+  char *words[128];
+  int word_count = 0;
+  char *token = strtok(line_up_to_cursor, " \t");
+  while (token != NULL && word_count < 128) {
+    words[word_count++] = token;
+    token = strtok(NULL, " \t");
+  }
+  if (word_count == 0) { return 0; }
+  strncpy(cmd, words[0], max_len - 1);
+  cmd[max_len - 1] = '\0';
+  int is_completing_partial = (text != NULL && strlen(text) > 0);
+  if (is_completing_partial) {
+    if (word_count >= 2) {
+      strncpy(prev_word, words[word_count - 2], max_len - 1);
+    } else { 
+      prev_word[0] = '\0';
+    }
+  } else {
+    if (word_count >= 1) {
+      strncpy(prev_word, words[word_count = 1], max_len - 1);
+    } else {
+      prev_word[0] = '\0';
+    }
+  }
+  prev_word[max_len - 1] = '\0';
+  return 1;
+}
+
 char *script_generator(const char *text, int state) {
   if (!state) {
     clear_matches(&script_matches, &script_match_count, &script_match_idx);
-    char *line_copy = strdup(rl_line_buffer);
-    char *cmd = strtok(line_copy, " \t");
+    char cmd[256];
+    char prev_word[256];
+    if (!get_completion_context(cmd, text, prev_word, 256)) { return NULL; }
+
     char *script_path = NULL;
     for (int i = 0; i < completion_count; i++) {
       if (strcmp(completion_registry[i].command_name, cmd) == 0) {
@@ -122,7 +160,7 @@ char *script_generator(const char *text, int state) {
       snprintf(comp_point_str, sizeof(comp_point_str), "%d", rl_point);
       setenv("COMP_LINE", rl_line_buffer, 1);
       setenv("COMP_POINT", comp_point_str, 1);
-      execl(script_path, script_path, cmd, text, NULL);
+      execl(script_path, script_path, cmd, text, prev_word, NULL);
       exit(EXIT_FAILURE);
     }
 
