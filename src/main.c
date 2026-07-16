@@ -292,8 +292,8 @@ int main(int argc, char *argv[]) {
         if (args[2] == NULL) {
           for (int i = 0; i < completion_count; i++) {
             printf("complete -C '%s' %s\n", 
-                    completion_registry[i].command_name, 
-                    completion_registry[i].completer_script);
+                    completion_registry[i].completer_script, 
+                    completion_registry[i].command_name);
           }
         } else {
           char *target = args[2];
@@ -301,8 +301,8 @@ int main(int argc, char *argv[]) {
           for (i = 0; i < completion_count; i++) {
             if (strcmp(completion_registry[i].command_name, target) == 0) {
               printf("complete -C '%s' %s\n", 
-                      completion_registry[i].command_name, 
-                      completion_registry[i].completer_script);
+                      completion_registry[i].completer_script, 
+                      completion_registry[i].command_name);
               break;
             }
           }
@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
             break;
           }
           
-          if (found != -1) {
+          if (found_idx != -1) {
             free(completion_registry[found_idx].completer_script);
             completion_registry[found_idx].completer_script = strdup(args[2]);
           } else {
@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
             completion_count++;
           }
         }
-        
+
     } else { 
       char full_path[PATH_MAX];
       if (find_path(args[0], full_path)) {
