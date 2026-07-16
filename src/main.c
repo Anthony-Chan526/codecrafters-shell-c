@@ -108,7 +108,7 @@ void clear_script_matches() {
   script_match_idx = 0;
 }
 
-char *script_generator(conat char *text, int state) {
+char *script_generator(const char *text, int state) {
   if (!state) {
     clear_script_matches();
     char *line_copy = strdup(rl_line_buffer);
