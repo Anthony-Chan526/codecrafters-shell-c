@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
     
     } else if(strcmp(args[0], "complete") == 0) {  
       if(strcmp(args[1], "-p") == 0) {
-        fprintf(stderr, "complete: %s: no completion specification", args[2]);
+        fprintf(stderr, "complete: %s: no completion specification\n", args[2]);
       }
 
     } else { 
