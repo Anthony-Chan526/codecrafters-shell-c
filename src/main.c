@@ -28,7 +28,7 @@ static char **script_matches = NULL;
 static int script_match_count = 0;
 static int script_match_idx = 0;
 
-void clear_matches(***matches, *count, *idx) {
+void clear_matches(char ***matches, int *count, int *idx) {
   if (matches) {
     for (int i = 0; i < count; i++) {
       free(matches[i]);
