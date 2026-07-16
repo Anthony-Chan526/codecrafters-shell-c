@@ -92,11 +92,96 @@ char *command_generator(const char *text, int state) {
   return NULL;
 }
 
+static char **script_matches = NULL;
+static int script_match_count = 0;
+static int script_match_idx = 0;
+
+void clear_script_matches() {
+  if (script_matches) {
+    for (int i = 0; i < script_match_count; i++) {
+      free(script_matches[i]);
+    }
+    free(script_matches);
+    script_matches = NULL;
+  }
+  script_match_count = 0;
+  script_match_idx = 0;
+}
+
+char *script_generator(conat char *text, int state) {
+  if (!state) {
+    clear_script_matches();
+    char *line_copy = strdup(rl_line_buffer);
+    char *cmd = strtok(line_copy, " \t");
+    char *script_path = NULL;
+    for (int i = 0; i < completion_count; i++) {
+      if (strcmp(completion_registry[i].command_name, cmd) == 0) {
+        script_path = completion_registry[i].completer_script;
+        break;
+      }
+    }
+    free(line_copy);
+    if(script_path == NULL) { return NULL; }
+    
+    int pipe_fds[2];
+    if (pipe(pipe_fds) < 0) { return NULL; }
+    pid_t pid = fork();
+    if (pid == 0) {
+      dup2(pipe_fds[1], STDOUT_FILENO); 
+      close(pipe_fds[0]);
+      close(pipe_fds[1]);
+      char comp_point_str[16];
+      snprintf(comp_point_str, sizeof(comp_point_str), "%d", rl_point);
+      setenv("COMP_LINE", rl_line_buffer, 1);
+      setenv("COMP_POINT", comp_point_str, 1);
+      execl(script_path, script_path, cmd_name, text, NULL);
+      exit(EXIT_FAILURE);
+    }
+
+    close(pipe_fds[1]);
+    FILE *stream = fdopen(pipe_fds[0], "r");
+    char line[256];
+    int len = strlen(text);
+    while (fgets(line, sizeof(line), stream)) {
+      line[strcspn(line, "\n")] = "\0";
+      if (strncmp(line, text, len) == 0) {
+        script_matches = realloc(script_matches, (script_match_count + 1) * sizeof(char *));
+        script_matches[script_match_count++] = strdup(line);
+      }
+    }
+    fclose(stream);
+    waitpid(pid, NULL, 0);
+  }
+  if (script_match_idx < script_match_count) {
+    return strdup(script_matches[script_match_idx++]);
+  }
+  clear_matches;
+  return NULL;
+}
+
 char **command_completion(const char *text, int start, int end) {
     if (start == 0) {
         rl_attempted_completion_over = 1;
         return rl_completion_matches(text, command_generator);
     }
+
+    char *line_copy = strdup(rl_line_buffer);
+    char *cmd = strtok(line_copy, " \t");
+    char *script = NULL;
+    if (cmd != NULL) {
+      for (int i = 0; i < completion_count; i++) {
+        if (strcmp(completion_registry[i].command_name, cmd) == 0) {
+          script = completion_registry[i].completer_script;
+          break;
+        }
+      }
+    }
+    free(line_copy);
+    if (script != NULL) {
+      rl_attempted_completion_over = 1;
+      return rl_completion_matches(text, script_generator);
+    }
+
     rl_attempted_completion_over = 0;
     return NULL;
 }
