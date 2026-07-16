@@ -12,6 +12,14 @@
 
 char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete", NULL};
 
+typedef struct {
+  char *command_name;
+  char *completer_script;
+} Completion;
+
+Completion completion_registry[100];
+int completion_count = 0;  
+
 static char **command_matches = NULL;
 static int match_count = 0;
 static int current_match_idx = 0;
@@ -247,7 +255,7 @@ int main(int argc, char *argv[]) {
         printf("%s is a shell builtin\n", args[1]);
       } else {
         char full_path[PATH_MAX];
-        if(find_path(args[1], full_path)) {
+        if (find_path(args[1], full_path)) {
           printf("%s is %s\n", args[1], full_path);
         } else {
           fprintf(stderr, "%s: not found\n", args[1]);
@@ -279,14 +287,50 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "cd: %s: No such file or directory\n", new_dir);
       }
     
-    } else if(strcmp(args[0], "complete") == 0) {  
-      if(strcmp(args[1], "-p") == 0) {
-        fprintf(stderr, "complete: %s: no completion specification\n", args[2]);
-      }
-
+    } else if (strcmp(args[0], "complete") == 0) {  
+      if (strcmp(args[1], "-p") == 0) {
+        if (args[2] == NULL) {
+          for (int i = 0; i < completion_count; i++) {
+            printf("complete -C '%s' %s\n", 
+                    completion_registry[i].command_name, 
+                    completion_registry[i].completer_script);
+          }
+        } else {
+          char *target = args[2];
+          int i;
+          for (i = 0; i < completion_count; i++) {
+            if (strcmp(completion_registry[i].command_name, target) == 0) {
+              printf("complete -C '%s' %s\n", 
+                      completion_registry[i].command_name, 
+                      completion_registry[i].completer_script);
+              break;
+            }
+          }
+          if (i >= completion_count) {
+            fprintf(stderr, "complete: %s: no completion specification\n", args[2]);
+          } 
+        }
+      } else if (strcmp(args[1], "-C") == 0)
+        int found_idx = -1; 
+        for (int i = 0; i < completion_count; i++) {
+          if (strcmp(completion_registry[i].command_name, args[3]) == 0) {
+            found_idx = i;
+            break;
+          }
+          
+          if (found != -1) {
+            free(completion_registry[found_idx].completer_script);
+            completion_registry[found_idx].completer_script = strdup(args[2]);
+          } else {
+            completion_registry[completion_count].command_name = strdup(args[3]);
+            completion_registry[completion_count].completer_script = strdup(args[2]);
+            completion_count++;
+          }
+        }
+        
     } else { 
       char full_path[PATH_MAX];
-      if(find_path(args[0], full_path)) {
+      if (find_path(args[0], full_path)) {
         pid_t pid = fork();
         if (pid == 0) {
           execv(full_path, args);
