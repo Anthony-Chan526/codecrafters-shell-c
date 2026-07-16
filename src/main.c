@@ -134,7 +134,7 @@ char *script_generator(const char *text, int state) {
       snprintf(comp_point_str, sizeof(comp_point_str), "%d", rl_point);
       setenv("COMP_LINE", rl_line_buffer, 1);
       setenv("COMP_POINT", comp_point_str, 1);
-      execl(script_path, script_path, cmd_name, text, NULL);
+      execl(script_path, script_path, cmd, text, NULL);
       exit(EXIT_FAILURE);
     }
 
