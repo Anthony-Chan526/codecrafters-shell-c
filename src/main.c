@@ -458,7 +458,7 @@ int main(int argc, char *words[]) {
         }  
       }
 
-    } else {
+    } else if (strcmp(args[0], "jobs") == 0) {
       continue;
 
     } else { 
