@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete" NULL};
+char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete", NULL};
 
 static char **command_matches = NULL;
 static int match_count = 0;
