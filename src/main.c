@@ -31,7 +31,7 @@ typedef struct {
   int job_id;
   pid_t pid;
   char *command;
-  Jobstate state;
+  JobState state;
 } Job;
 
 Job job_list[MAX_JOBS];
