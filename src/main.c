@@ -518,6 +518,9 @@ int main(int argc, char *words[]) {
             printf("[%d]%c  Running                 %s &\n", job_list[i].job_id, symbol, job_list[i].command);
           } else {
             printf("[%d]%c  Done                 %s\n", job_list[i].job_id, symbol, job_list[i].command);
+            free(job_list[i].command);
+            job_list[i].command = NULL;
+            job_list[i].state = EMPTY;
           }
         }
       }
