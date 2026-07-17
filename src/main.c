@@ -367,7 +367,7 @@ void remove_job_history(int idx) {
   }
 }
 
-void print_and_clean_reaped_job() {
+void print_and_clean_reaped_jobs() {
   for (int i = 0; i < MAX_JOBS; i++) {
     if (job_list[i].state == DONE) {
       char symbol = ' ';
@@ -396,7 +396,7 @@ int main(int argc, char *words[]) {
 
   while (1) {
     reap_background_jobs();
-    print_and_clean_reaped_job();
+    print_and_clean_reaped_jobs();
     char *line = readline("$ ");
     if (line == NULL) { 
       break; 
