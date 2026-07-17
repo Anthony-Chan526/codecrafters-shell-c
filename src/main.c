@@ -505,6 +505,7 @@ int main(int argc, char *words[]) {
       }
 
     } else if (strcmp(args[0], "jobs") == 0) {
+      reap_background_jobs();
       for (int i = 0; i < next_job; i++) {
         if (job_list[i].state != EMPTY) {
           char symbol = ' ';
