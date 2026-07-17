@@ -332,7 +332,7 @@ void reap_background_jobs() {
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
     for (int i = 0; i < MAX_JOBS; i++) {
-      if (job_list[i].is_active && job_list[i].pid == pid) {
+      if (job_list[i].active && job_list[i].pid == pid) {
         free(job_list[i].command);
         job_list[i].active = 0;
         break;
