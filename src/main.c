@@ -35,7 +35,8 @@ typedef struct {
 } Job;
 
 Job job_list[MAX_JOBS];
-int next_job = 1;
+int job_count = 0;
+int job_history[MAX_JOBS];
 
 static char **command_matches = NULL;
 static int match_count = 0;
@@ -346,6 +347,26 @@ void reap_background_jobs() {
   }
 }
 
+void add_job_history(int idx) {
+  for (int i = job_count; i > 0; i--) {
+    job_history[i] = job_history[i - 1];
+  }
+  job_history[0] = idx
+  job_count++;
+}
+
+void remove_job_history(int idx) {
+  for (int i = 0; i < job_count; i++) {
+    if (job_history[i] == idx) {
+      for int (j = i; j < job_count - 1; j++) {
+        job_history[j] = job_history[j + 1];
+      }
+      history_count--;
+      break;
+    }
+  }
+}
+
 int main(int argc, char *words[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
@@ -506,12 +527,12 @@ int main(int argc, char *words[]) {
 
     } else if (strcmp(args[0], "jobs") == 0) {
       reap_background_jobs();
-      for (int i = 0; i < next_job; i++) {
+      for (int i = 0; i < MAX_JOBS; i++) {
         if (job_list[i].state != EMPTY) {
           char symbol = ' ';
-          if (i == next_job - 2) {
+          if (job_history[0] == i) {
             symbol = '+';
-          } else if (i == next_job - 3) {
+          } else if (job_history[1] == i) {
             symbol = '-';
           } 
           if (job_list[i].state == RUNNING) {
@@ -521,6 +542,7 @@ int main(int argc, char *words[]) {
             free(job_list[i].command);
             job_list[i].command = NULL;
             job_list[i].state = EMPTY;
+            remove_job_history(i);
           }
         }
       }
@@ -544,7 +566,7 @@ int main(int argc, char *words[]) {
           if (background) {
             for (int i = 0; i < MAX_JOBS; i++) {
               if (job_list[i].state == EMPTY) {
-                job_list[i].job_id = next_job++;
+                job_list[i].job_id = i + 1;
                 job_list[i].pid = pid;
                 char *amp = strrchr(input_copy, '&');
                 if (amp) { *amp = '\0'; }
@@ -556,6 +578,7 @@ int main(int argc, char *words[]) {
                 job_list[i].command = strdup(input_copy);
                 job_list[i].state = RUNNING;
                 printf("[%d] %d\n", job_list[i].job_id, pid);
+                add_job_history(i);
                 break;
               }
             }
