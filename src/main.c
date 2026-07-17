@@ -521,6 +521,8 @@ int main(int argc, char *words[]) {
                 job_list[i].pid = pid;
                 job_list[i].command = strdup(args[0]);
                 job_list[i].active = 1;
+                printf("[%d] %d\n", job_list[i].job_id, pid);
+                break;
               }
             }
           } else {
