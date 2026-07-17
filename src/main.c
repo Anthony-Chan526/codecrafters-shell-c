@@ -367,6 +367,24 @@ void remove_job_history(int idx) {
   }
 }
 
+void print_and_clean_reaped_job() {
+  for (int i = 0, i < MAX_JOBS; i++) {
+    if (job_list[i].state == DONE) {
+      char symbol = ' ';
+      if (job_history[0] == i) {
+        symbol = '+';
+      } else if (job_history[1] == i) {
+        symbol = '-';
+      } 
+      printf("[%d]%c  Done                 %s\n", job_list[i].job_id, symbol, job_list[i].command);
+      free(job_list[i].command);
+      job_list[i].command = NULL;
+      job_list[i].state = EMPTY;
+      remove_job_history(i);
+    }
+  }
+}
+
 int main(int argc, char *words[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
@@ -378,6 +396,7 @@ int main(int argc, char *words[]) {
 
   while (1) {
     reap_background_jobs();
+    print_and_clean_reaped_job();
     char *line = readline("$ ");
     if (line == NULL) { 
       break; 
