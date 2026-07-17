@@ -501,7 +501,7 @@ int main(int argc, char *words[]) {
 
     } else if (strcmp(args[0], "jobs") == 0) {
       for (int i = 0; i < MAX_JOBS; i++) {
-        if (job_list.active) {
+        if (job_list[i].active) {
           printf("[%d]+  Running                 %s\n", job_list[i].job_id, job_list[i].command);
         }
       }
