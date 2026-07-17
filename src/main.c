@@ -20,6 +20,17 @@ typedef struct {
 Completion completion_registry[100];
 int completion_count = 0;  
 
+#define MAX_JOBS 32
+typedef struct {
+  int job_id;
+  pid_t pid;
+  char *command;
+  int active;
+} Job;
+
+Job job_list[MAX_JOBS];
+int next_job = 1;
+
 static char **command_matches = NULL;
 static int match_count = 0;
 static int current_match_idx = 0;
@@ -273,7 +284,7 @@ void parse_input(char *input, char **args, int max_args) {
     }
     *dst = '\0';
   }
-  args[count] = NULL;
+  args[count] = NULL; 
 }
 
 int handle_redirection(char **args) {
@@ -313,7 +324,22 @@ int handle_redirection(char **args) {
     }
   }
   return 0;
-} 
+}
+
+void reap_background_jobs() {
+  int status;
+  pid_t pid;
+
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+    for (int i = 0; i < MAX_JOBS; i++) {
+      if (job_list[i].is_active && job_list[i].pid == pid) {
+        free(job_list[i].command);
+        job_list[i].active = 0;
+        break;
+      }
+    }
+  }
+}
 
 int main(int argc, char *words[]) {
   // Flush after every printf
@@ -343,6 +369,17 @@ int main(int argc, char *words[]) {
     }
 
     if (args[0] == NULL) { continue; }
+
+    int background = 0;
+    int last_idx = 0;
+    while (args[last_idx] != NULL) {
+      last_idx++;
+    }
+    last_idx--;
+    if (last_idx >= 0 && strcmp(args[last_idx], "&") == 0) {
+      background = 1;
+      args[last_idx] = NULL;
+    }
 
     else if (strcmp(args[0], "exit") == 0) { break; }
     
@@ -466,11 +503,27 @@ int main(int argc, char *words[]) {
       if (find_path(args[0], full_path)) {
         pid_t pid = fork();
         if (pid == 0) {
+          if (background) {
+            int dev_null = open("/dev/null", O_RDONLY);
+            if (dev_null != -1) {
+              dup2(dev_null, STDIN_FILENO);
+              close(dev_null);
+            }
+          }
           execv(full_path, args);
           perror("Execution failed");
           exit(EXIT_FAILURE);
         } else {
-          if (strcmp(args[2], "&") != 0) {
+          if (background) {
+            for (int i = 0; i < MAX_JOBS; i++) {
+              if (!job_list[i].active) {
+                job_list[i].job_id = next_job++;
+                job_list[i].pid = pid;
+                job_list[i].command = strdup(args[0]);
+                job_list[i].active = 1;
+              }
+            }
+          } else {
             waitpid(pid, NULL, 0);
           }
         }
