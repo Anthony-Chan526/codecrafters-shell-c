@@ -368,7 +368,7 @@ void remove_job_history(int idx) {
 }
 
 void print_and_clean_reaped_job() {
-  for (int i = 0, i < MAX_JOBS; i++) {
+  for (int i = 0; i < MAX_JOBS; i++) {
     if (job_list[i].state == DONE) {
       char symbol = ' ';
       if (job_history[0] == i) {
