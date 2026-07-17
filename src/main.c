@@ -347,6 +347,7 @@ int main(int argc, char *words[]) {
 
   char *args[64];
   char input[1024];
+  char input_copy[1024];
   rl_attempted_completion_function = command_completion;
 
   while (1) {
@@ -357,6 +358,8 @@ int main(int argc, char *words[]) {
     }
     strncpy(input, line, sizeof(input) - 1);
     input[sizeof(input) - 1] = '\0';
+    strncpy(input_copy, line, sizeof(input) - 1);
+    input_copy[sizeof(input) - 1] = '\0';
     free(line);
 
     parse_input(input, args, 64);
@@ -497,7 +500,11 @@ int main(int argc, char *words[]) {
       }
 
     } else if (strcmp(args[0], "jobs") == 0) {
-      continue;
+      for (int i = 0; i < MAX_JOBS; i++) {
+        if (job_list.active) {
+          printf("[%d]+  Running                 %s &\n", job_list[i].job_id, job_list[i].command)
+        }
+      }
 
     } else { 
       char full_path[PATH_MAX];
@@ -520,7 +527,7 @@ int main(int argc, char *words[]) {
               if (!job_list[i].active) {
                 job_list[i].job_id = next_job++;
                 job_list[i].pid = pid;
-                job_list[i].command = strdup(args[0]);
+                job_list[i].command = strdup(input_copy);
                 job_list[i].active = 1;
                 printf("[%d] %d\n", job_list[i].job_id, pid);
                 break;
