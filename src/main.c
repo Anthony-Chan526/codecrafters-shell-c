@@ -21,11 +21,17 @@ Completion completion_registry[100];
 int completion_count = 0;  
 
 #define MAX_JOBS 32
+typedef enum {
+  EMPTY = 0,
+  RUNNING,
+  DONE
+} JobState;
+
 typedef struct {
   int job_id;
   pid_t pid;
   char *command;
-  int active;
+  Jobstate state;
 } Job;
 
 Job job_list[MAX_JOBS];
@@ -332,9 +338,8 @@ void reap_background_jobs() {
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
     for (int i = 0; i < MAX_JOBS; i++) {
-      if (job_list[i].active && job_list[i].pid == pid) {
-        free(job_list[i].command);
-        job_list[i].active = 0;
+      if (job_list[i].state == RUNNING && job_list[i].pid == pid) {
+        job_list[i].state = DONE;
         break;
       }
     }
@@ -501,13 +506,17 @@ int main(int argc, char *words[]) {
 
     } else if (strcmp(args[0], "jobs") == 0) {
       for (int i = 0; i < next_job; i++) {
-        if (job_list[i].active) {
+        if (job_list[i].state != EMPTY) {
+          char symbol = ' ';
           if (i == next_job - 2) {
-            printf("[%d]+  Running                 %s\n", job_list[i].job_id, job_list[i].command);
+            symbol = '+';
           } else if (i == next_job - 3) {
-            printf("[%d]-  Running                 %s\n", job_list[i].job_id, job_list[i].command);
+            symbol = '-';
+          } 
+          if (job_list[i].state == RUNNING) {
+            printf("[%d]%c  Running                 %s &\n", job_list[i].job_id, symbol, job_list[i].command);
           } else {
-            printf("[%d]   Running                 %s\n", job_list[i].job_id, job_list[i].command);
+            printf("[%d]%c  DONE                 %s\n", job_list[i].job_id, symbol, job_list[i].command);
           }
         }
       }
@@ -530,11 +539,18 @@ int main(int argc, char *words[]) {
         } else {
           if (background) {
             for (int i = 0; i < MAX_JOBS; i++) {
-              if (!job_list[i].active) {
+              if (job_list[i].state == EMPTY) {
                 job_list[i].job_id = next_job++;
                 job_list[i].pid = pid;
+                char *amp = strrchr(input_copy, '&');
+                if (amp) { *amp = '\0'; }
+                int len = strlen(input_copy);
+                while (len > 0 && (input_copy[len - 1] == ' ' || input_copy[len - 1] == '\t')) {
+                  input_copy[len - 1] = '\0';
+                  len--; 
+                }
                 job_list[i].command = strdup(input_copy);
-                job_list[i].active = 1;
+                job_list[i].state = RUNNING;
                 printf("[%d] %d\n", job_list[i].job_id, pid);
                 break;
               }
