@@ -470,7 +470,9 @@ int main(int argc, char *words[]) {
           perror("Execution failed");
           exit(EXIT_FAILURE);
         } else {
-          waitpid(pid, NULL, 0);
+          if (strcmp(args[2], "&") != 0) {
+            waitpid(pid, NULL, 0);
+          }
         }
       } else {
         fprintf(stderr, "%s: command not found\n", args[0]);
