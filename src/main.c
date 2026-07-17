@@ -500,9 +500,15 @@ int main(int argc, char *words[]) {
       }
 
     } else if (strcmp(args[0], "jobs") == 0) {
-      for (int i = 0; i < MAX_JOBS; i++) {
+      for (int i = 0; i < next_job; i++) {
         if (job_list[i].active) {
-          printf("[%d]+  Running                 %s\n", job_list[i].job_id, job_list[i].command);
+          if (i == next_job - 1) {
+            printf("[%d]+  Running                 %s\n", job_list[i].job_id, job_list[i].command);
+          } else if {
+            printf("[%d]-  Running                 %s\n", job_list[i].job_id, job_list[i].command);
+          } else {
+            printf("[%d]   Running                 %s\n", job_list[i].job_id, job_list[i].command);
+          }
         }
       }
 
