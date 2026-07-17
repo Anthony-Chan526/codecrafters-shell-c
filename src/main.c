@@ -516,7 +516,7 @@ int main(int argc, char *words[]) {
           if (job_list[i].state == RUNNING) {
             printf("[%d]%c  Running                 %s &\n", job_list[i].job_id, symbol, job_list[i].command);
           } else {
-            printf("[%d]%c  DONE                 %s\n", job_list[i].job_id, symbol, job_list[i].command);
+            printf("[%d]%c  Done                 %s\n", job_list[i].job_id, symbol, job_list[i].command);
           }
         }
       }
