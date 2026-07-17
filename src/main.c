@@ -382,7 +382,7 @@ int main(int argc, char *words[]) {
       args[last_idx] = NULL;
     }
 
-    else if (strcmp(args[0], "exit") == 0) { break; }
+    if (strcmp(args[0], "exit") == 0) { break; }
     
     else if (strcmp(args[0], "echo") == 0) {
       for (int i = 1; args[i] != NULL; i++) {
