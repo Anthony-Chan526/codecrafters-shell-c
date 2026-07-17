@@ -504,7 +504,7 @@ int main(int argc, char *words[]) {
         if (job_list[i].active) {
           if (i == next_job - 1) {
             printf("[%d]+  Running                 %s\n", job_list[i].job_id, job_list[i].command);
-          } else if {
+          } else if (i == next_job - 2) {
             printf("[%d]-  Running                 %s\n", job_list[i].job_id, job_list[i].command);
           } else {
             printf("[%d]   Running                 %s\n", job_list[i].job_id, job_list[i].command);
