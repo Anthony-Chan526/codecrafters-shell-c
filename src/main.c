@@ -350,6 +350,7 @@ int main(int argc, char *words[]) {
   rl_attempted_completion_function = command_completion;
 
   while (1) {
+    reap_background_jobs();
     char *line = readline("$ ");
     if (line == NULL) { 
       break; 
