@@ -351,7 +351,7 @@ void add_job_history(int idx) {
   for (int i = job_count; i > 0; i--) {
     job_history[i] = job_history[i - 1];
   }
-  job_history[0] = idx
+  job_history[0] = idx;
   job_count++;
 }
 
@@ -361,7 +361,7 @@ void remove_job_history(int idx) {
       for (int j = i; j < job_count - 1; j++) {
         job_history[j] = job_history[j + 1];
       }
-      history_count--;
+      job_count--;
       break;
     }
   }
