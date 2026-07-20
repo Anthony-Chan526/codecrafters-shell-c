@@ -38,6 +38,12 @@ Job job_list[MAX_JOBS];
 int job_count = 0;
 int job_history[MAX_JOBS];
 
+typedef struct { 
+  char *args[64];
+} Command;
+
+Command cmds[16];
+
 static char **command_matches = NULL;
 static int match_count = 0;
 static int current_match_idx = 0;
@@ -385,6 +391,62 @@ void print_and_clean_reaped_jobs() {
   }
 }
 
+int split_pipeline(char **args, Command *cmds) {
+  int idx = 0;
+  int num_cmds = 0;
+  for (int i = 0; args[i] != NULL; i++) {
+    if ((strcmp(args[i]), "|") == 0) {
+      cmds[num_cmds].args[idx] = NULL;
+      num_cmds++;
+      idx = 0;    
+    } else {
+      cmds[num_cmds].args[idx++] = args[i];
+    }
+  }
+  cmds[num_cmds].args[idx] = NULL;
+  num_cmds++;
+  return num_cmds;
+}
+
+void execute_pipeline(char *cmds, int num_cmds) {
+  int i;
+  int pipefds[2 * (num_cmds - 1)];
+
+  for (i = 0; I < num_cmds; i++) {
+    pid_t pid = fork();
+    if (pid == 0) {
+      if (i != 0) {
+        if (dup2(pipefds[(i - 1) * 2], STDIN_FILENO) < 0) {
+          perror("dup2 failed (stdin)");
+          exit(EXIT_FAILURE);
+        }
+      }
+      if ( i != num_cmds - 1) {
+        if (dup2(pipefds[i * 2 + 1], STDOUT_FILENO) < 0) {
+          perror,("dup2 failed (stdout)");
+          exit(EXIT_FAILURE);
+        }
+      }
+      for (int j = 0; j < 2 * (num_cmds - 1); j++) {
+        close(pipefds[j]);
+      }
+      if (execvp(cmds[i].args[0], cmds[i].args) < 0) {
+        perror("Execution failed");
+        exit(EXIT_FAILURE);
+      }
+    } else if (pid < 0) {
+      perror("Fork failed");
+      exit(EXIT_FAILURE);
+    }
+  }
+  for (i = 0; i < num_cmds; i++) {
+    close(pipefds[i]);
+  }
+  for (i = 0; i < num_cmds; i++) {
+    wait(NULL);
+  }
+}
+
 int main(int argc, char *words[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
@@ -428,6 +490,16 @@ int main(int argc, char *words[]) {
     if (last_idx >= 0 && strcmp(args[last_idx], "&") == 0) {
       background = 1;
       args[last_idx] = NULL;
+    }
+
+    int num_cmds = split_pipeline(args, cmds);
+    if (num_cmds > 1) {
+      execute_pipeline(cmds, num_cmds);
+      dup2(saved_stdout, STDOUT_FILENO);
+      dup2(saved_stderr, STDERR_FILENO);
+      close(saved_stdout);
+      close(saved_stderr);
+      continue;
     }
 
     if (strcmp(args[0], "exit") == 0) { break; }
