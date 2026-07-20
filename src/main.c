@@ -408,6 +408,163 @@ int split_pipeline(char **args, Command *cmds) {
   return num_cmds;
 }
 
+void execute_single_command(char **args) {
+  if (args[0] == NULL) { exit(EXIT_SUCCESS); }
+  if (strcmp(args[0], "exit") == 0) { exit(EXIT_SUCCESS); }
+    
+  else if (strcmp(args[0], "echo") == 0) {
+    for (int i = 1; args[i] != NULL; i++) {
+      printf("%s", args[i]);
+      if (args[i + 1] != NULL) {
+        printf(" ");
+      }
+    }
+    printf("\n");
+    exit(EXIT_SUCCESS);
+    
+  } else if (strcmp(args[0], "type") == 0) {
+    if (strcmp(args[1], "echo") == 0 || 
+        strcmp(args[1], "exit") == 0 || 
+        strcmp(args[1], "type") == 0 || 
+        strcmp(args[1], "pwd") == 0 ||
+        strcmp(args[1], "cd") == 0 ||
+        strcmp(args[1], "complete") == 0 ||
+        strcmp(args[1], "jobs") == 0) {
+          printf("%s is a shell builtin\n", args[1]);
+    } else {
+      char full_path[PATH_MAX];
+      if (find_path(args[1], full_path)) {
+        printf("%s is %s\n", args[1], full_path);
+      } else {
+        fprintf(stderr, "%s: not found\n", args[1]);
+      }
+    }
+    exit(EXIT_SUCCESS);
+
+  } else if (strcmp(args[0], "pwd") == 0) {
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      printf("%s\n", cwd);
+    } else {
+      perror("pwd");
+    }
+    exit(EXIT_SUCCESS);
+
+  } else if (strcmp(args[0], "cd") == 0) {
+    char *new_dir = args[1];
+    char full_path[PATH_MAX];
+    if (new_dir[0] == '~') {
+      char *home = getenv("HOME");
+      if (new_dir[1] == '\0') { 
+        snprintf(full_path, sizeof(full_path), "%s", home);
+      } else {
+        snprintf(full_path, sizeof(full_path), "%s%s", home, new_dir + 1);
+      }
+    } else {
+      snprintf(full_path, sizeof(full_path), "%s", new_dir);
+    }
+    if (chdir(full_path) != 0) {
+      fprintf(stderr, "cd: %s: No such file or directory\n", new_dir);
+    }
+    exit(EXIT_SUCCESS);
+    
+  } else if (strcmp(args[0], "complete") == 0) {  
+    if (strcmp(args[1], "-p") == 0) {
+      if (args[2] == NULL) {
+        for (int i = 0; i < completion_count; i++) {
+          printf("complete -C '%s' %s\n", 
+                  completion_registry[i].completer_script, 
+                  completion_registry[i].command_name);
+        }
+      } else {
+        int i;
+        for (i = 0; i < completion_count; i++) {
+          if (strcmp(completion_registry[i].command_name, args[2]) == 0) {
+            printf("complete -C '%s' %s\n", 
+                    completion_registry[i].completer_script, 
+                    completion_registry[i].command_name);
+            break;
+          }
+        }
+        if (i >= completion_count) {
+          fprintf(stderr, "complete: %s: no completion specification\n", args[2]);
+        } 
+      }
+    } else if (strcmp(args[1], "-C") == 0) {
+      int found_idx = -1; 
+      for (int i = 0; i < completion_count; i++) {
+        if (strcmp(completion_registry[i].command_name, args[3]) == 0) {
+          found_idx = i;
+          break;
+        }
+      }  
+        
+      if (found_idx != -1) {
+        free(completion_registry[found_idx].completer_script);
+        completion_registry[found_idx].completer_script = strdup(args[2]);
+      } else {
+        completion_registry[completion_count].command_name = strdup(args[3]);
+        completion_registry[completion_count].completer_script = strdup(args[2]);
+        completion_count++;
+      }
+    } else if (strcmp(args[1], "-r") == 0) {
+      if (args[2] == NULL) {
+        for (int i = 0; i < completion_count; i++) {
+          free(completion_registry[i].command_name);
+          free(completion_registry[i].completer_script);
+        }
+      } else {
+        for (int i = 0; i < completion_count; i++) {
+          if (strcmp(completion_registry[i].command_name, args[2]) == 0) {
+            free(completion_registry[i].command_name);
+            free(completion_registry[i].completer_script);
+            for (int j = i; j < completion_count - 1; j++) {
+              completion_registry[j] = completion_registry[j + 1];
+            }
+            completion_count--;
+            break;
+          }
+        }
+      }  
+    }
+    exit(EXIT_SUCCESS);
+
+  } else if (strcmp(args[0], "jobs") == 0) {
+    reap_background_jobs();
+    for (int i = 0; i < MAX_JOBS; i++) {
+      if (job_list[i].state != EMPTY) {
+        char symbol = ' ';
+        if (job_history[0] == i) {
+          symbol = '+';
+        } else if (job_history[1] == i) {
+          symbol = '-';
+        } 
+        if (job_list[i].state == RUNNING) {
+          printf("[%d]%c  Running                 %s &\n", job_list[i].job_id, symbol, job_list[i].command);
+        } else {
+          printf("[%d]%c  Done                 %s\n", job_list[i].job_id, symbol, job_list[i].command);
+          free(job_list[i].command);
+          job_list[i].command = NULL;
+          job_list[i].state = EMPTY;
+          remove_job_history(i);
+        }
+      }
+    }
+    exit(EXIT_SUCCESS);
+
+  } else { 
+    char full_path[PATH_MAX];
+    if (find_path(args[0], full_path)) {
+      execv(full_path, args);
+      perror("execv failed");
+      exit(EXIT_FAILURE);
+    } else {
+      fprintf(stderr, "%s: command not found\n", args[0]);
+      exit(EXIT_FAILURE);
+    }
+  }     
+}
+
 void execute_pipeline(Command *cmds, int num_cmds) {
   int i;
   int pipefds[2 * (num_cmds - 1)];
@@ -437,10 +594,7 @@ void execute_pipeline(Command *cmds, int num_cmds) {
       for (int j = 0; j < 2 * (num_cmds - 1); j++) {
         close(pipefds[j]);
       }
-      if (execvp(cmds[i].args[0], cmds[i].args) < 0) {
-        perror("Execution failed");
-        exit(EXIT_FAILURE);
-      }
+      execute_single_command(cmds[i].args);
     } else if (pid < 0) {
       perror("Fork failed");
       exit(EXIT_FAILURE);
@@ -477,6 +631,8 @@ int main(int argc, char *words[]) {
     free(line);
 
     parse_input(input, args, 64);
+    if (args[0] == NULL) { continue; }
+
     int saved_stdout = dup(STDOUT_FILENO);
     int saved_stderr = dup(STDERR_FILENO);
     int redirect_error = handle_redirection(args); 
@@ -485,8 +641,6 @@ int main(int argc, char *words[]) {
       close(saved_stderr);
       continue;
     }
-
-    if (args[0] == NULL) { continue; }
 
     int background = 0;
     int last_idx = 0;
