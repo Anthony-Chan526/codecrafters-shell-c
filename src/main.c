@@ -395,7 +395,7 @@ int split_pipeline(char **args, Command *cmds) {
   int idx = 0;
   int num_cmds = 0;
   for (int i = 0; args[i] != NULL; i++) {
-    if ((strcmp(args[i]), "|") == 0) {
+    if (strcmp(args[i], "|") == 0) {
       cmds[num_cmds].args[idx] = NULL;
       num_cmds++;
       idx = 0;    
@@ -412,7 +412,7 @@ void execute_pipeline(Command *cmds, int num_cmds) {
   int i;
   int pipefds[2 * (num_cmds - 1)];
 
-  for (i = 0; I < num_cmds; i++) {
+  for (i = 0; i < num_cmds; i++) {
     pid_t pid = fork();
     if (pid == 0) {
       if (i != 0) {
