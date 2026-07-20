@@ -408,7 +408,7 @@ int split_pipeline(char **args, Command *cmds) {
   return num_cmds;
 }
 
-void execute_pipeline(char *cmds, int num_cmds) {
+void execute_pipeline(Command *cmds, int num_cmds) {
   int i;
   int pipefds[2 * (num_cmds - 1)];
 
