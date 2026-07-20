@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-char *commands[] = {"exit", "echo", "type", "pwd", "cd", "complete", "jobs", NULL};
+char *builtins[] = {"exit", "echo", "type", "pwd", "cd", "complete", "jobs", "history", NULL};
 
 typedef struct {
   char *command_name;
@@ -77,9 +77,9 @@ char *command_generator(const char *text, int state) {
     clear_matches(&command_matches, &match_count, &current_match_idx);
     int len = strlen(text);
     
-    for (int i = 0; commands[i] != NULL; i++) {
-      if (strncmp(commands[i], text, len) == 0) {
-        add_matches(commands[i]);
+    for (int i = 0; builtins[i] != NULL; i++) {
+      if (strncmp(builtins[i], text, len) == 0) {
+        add_matches(builtins[i]);
       }
     }
 
@@ -429,7 +429,8 @@ void execute_single_command(char **args) {
         strcmp(args[1], "pwd") == 0 ||
         strcmp(args[1], "cd") == 0 ||
         strcmp(args[1], "complete") == 0 ||
-        strcmp(args[1], "jobs") == 0) {
+        strcmp(args[1], "jobs") == 0 ||
+        strcmp(args[1], "history") == 0) {
           printf("%s is a shell builtin\n", args[1]);
     } else {
       char full_path[PATH_MAX];
@@ -550,6 +551,9 @@ void execute_single_command(char **args) {
         }
       }
     }
+    exit(EXIT_SUCCESS);
+  
+  } else if(strcmp(args[0], "history") == 0) {
     exit(EXIT_SUCCESS);
 
   } else { 
@@ -681,7 +685,8 @@ int main(int argc, char *words[]) {
           strcmp(args[1], "pwd") == 0 ||
           strcmp(args[1], "cd") == 0 ||
           strcmp(args[1], "complete") == 0 ||
-          strcmp(args[1], "jobs") == 0) {
+          strcmp(args[1], "jobs") == 0 ||
+          strcmp(args[1], "history") == 0) {
         printf("%s is a shell builtin\n", args[1]);
       } else {
         char full_path[PATH_MAX];
@@ -798,6 +803,9 @@ int main(int argc, char *words[]) {
           }
         }
       }
+    
+    } else if(strcmp(args[0], "history") == 0){
+      continue;
 
     } else { 
       char full_path[PATH_MAX];
