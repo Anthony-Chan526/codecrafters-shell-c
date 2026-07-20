@@ -600,7 +600,7 @@ void execute_pipeline(Command *cmds, int num_cmds) {
       exit(EXIT_FAILURE);
     }
   }
-  for (i = 0; i < num_cmds; i++) {
+  for (i = 0; i < 2 * (num_cmds - 1); i++) {
     close(pipefds[i]);
   }
   for (i = 0; i < num_cmds; i++) {
