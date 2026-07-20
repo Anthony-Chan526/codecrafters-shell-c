@@ -412,6 +412,13 @@ void execute_pipeline(Command *cmds, int num_cmds) {
   int i;
   int pipefds[2 * (num_cmds - 1)];
 
+  for (i =0; i < num_cmds - 1; i++) {
+    if (pipe(pipefds + i * 2) < 0) {
+      perror("Pipe creation failed");
+      exit(EXIT_FAILURE);
+    }
+  }
+
   for (i = 0; i < num_cmds; i++) {
     pid_t pid = fork();
     if (pid == 0) {
@@ -423,7 +430,7 @@ void execute_pipeline(Command *cmds, int num_cmds) {
       }
       if ( i != num_cmds - 1) {
         if (dup2(pipefds[i * 2 + 1], STDOUT_FILENO) < 0) {
-          perror,("dup2 failed (stdout)");
+          perror("dup2 failed (stdout)");
           exit(EXIT_FAILURE);
         }
       }
