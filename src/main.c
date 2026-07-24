@@ -631,7 +631,7 @@ void execute_pipeline(Command *cmds, int num_cmds) {
   }
 }
 
-void add_history(const char *input) {
+void add_cmd_history(const char *input) {
   if (input == NULL || strlen(input) == 0) { return; }
   if (history.count > 0 && strcmp(history.items[history.count - 1], input) == 0) { return; }
   if (history.count >= MAX_HISTORY) {
@@ -651,6 +651,8 @@ int main(int argc, char *words[]) {
   char *args[64];
   char input[1024];
   char input_copy[1024];
+
+  using_history();
   rl_attempted_completion_function = command_completion;
 
   while (1) {
@@ -660,11 +662,14 @@ int main(int argc, char *words[]) {
     if (line == NULL) { 
       break; 
     }
+    if (line != "\0") {
+      add_history(line);
+      add_cmd_history(line);
+    }
     strncpy(input, line, sizeof(input) - 1);
     input[sizeof(input) - 1] = '\0';
     strncpy(input_copy, line, sizeof(input) - 1);
     input_copy[sizeof(input) - 1] = '\0';
-    add_history(input);
     free(line);
 
     parse_input(input, args, 64);
