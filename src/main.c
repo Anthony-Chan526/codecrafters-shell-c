@@ -628,7 +628,7 @@ void add_history(const char *input) {
   if (history.count > 0 && strcmp(history.items[history.count - 1], input) == 0) { return; }
   if (history.count >= MAX_HISTORY) {
     free(history.items[0]);
-    for (int i = 0; i < MAX_HISTORY = 1; i++) {
+    for (int i = 0; i < MAX_HISTORY; i++) {
       history.items[i] = history.items[i + 1];
     }
     history.count = MAX_HISTORY - 1; 
