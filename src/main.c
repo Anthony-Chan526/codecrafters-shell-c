@@ -563,7 +563,7 @@ void execute_single_command(char **args) {
   
   } else if(strcmp(args[0], "history") == 0) {
     for (int i = 0; i < history.count; i++) {
-      printf("%d  %s", i + 1, history.items[i]);
+      printf("%d  %s\n", i + 1, history.items[i]);
     }
     exit(EXIT_SUCCESS);
 
@@ -831,7 +831,7 @@ int main(int argc, char *words[]) {
     
     } else if(strcmp(args[0], "history") == 0){
       for (int i = 0; i < history.count; i++) {
-        printf("%d  %s", i + 1, history.items[i]);
+        printf("%d  %s\n", i + 1, history.items[i]);
       }
 
     } else { 
