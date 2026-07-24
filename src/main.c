@@ -44,6 +44,14 @@ typedef struct {
 
 Command cmds[16];
 
+#define MAX_HISTORY 1000
+typedef struct {
+    char *items[MAX_HISTORY];
+    int count;
+} History;
+
+History history = { .count = 0 };
+
 static char **command_matches = NULL;
 static int match_count = 0;
 static int current_match_idx = 0;
@@ -554,6 +562,9 @@ void execute_single_command(char **args) {
     exit(EXIT_SUCCESS);
   
   } else if(strcmp(args[0], "history") == 0) {
+    for (int i = 0; i < history.count; i++) {
+      printf("%d  %s", i + 1, history.items[i]);
+    }
     exit(EXIT_SUCCESS);
 
   } else { 
@@ -612,6 +623,19 @@ void execute_pipeline(Command *cmds, int num_cmds) {
   }
 }
 
+void add_history(const char *input) {
+  if (input == NULL || strlen(input) == 0) { return; }
+  if (history.count > 0 && strcmp(history.items[history.count - 1], input) == 0) { return; }
+  if (history.count >= MAX_HISTORY) {
+    free(history.items[0]);
+    for (int i = 0; i < MAX_HISTORY = 1; i++) {
+      history.items[i] = history.items[i + 1];
+    }
+    history.count = MAX_HISTORY - 1; 
+  }
+  history.items[history.count++] = strdup(input);
+}
+
 int main(int argc, char *words[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
@@ -632,6 +656,7 @@ int main(int argc, char *words[]) {
     input[sizeof(input) - 1] = '\0';
     strncpy(input_copy, line, sizeof(input) - 1);
     input_copy[sizeof(input) - 1] = '\0';
+    add_history(input);
     free(line);
 
     parse_input(input, args, 64);
@@ -805,7 +830,9 @@ int main(int argc, char *words[]) {
       }
     
     } else if(strcmp(args[0], "history") == 0){
-      continue;
+      for (int i = 0; i < history.count; i++) {
+        printf("%d  %s", i + 1, history.items[i]);
+      }
 
     } else { 
       char full_path[PATH_MAX];
