@@ -567,7 +567,6 @@ void execute_single_command(char **args) {
       FILE *file = fopen(args[2], "r");
       if (file == NULL) {
         fprintf(stderr, "history: %s: No such file or directory\n", args[2]);
-        continue;
       }
       char fline[1024];
       while (fgets(fline, sizeof(fline), file) != NULL) {
