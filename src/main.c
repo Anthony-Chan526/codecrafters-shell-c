@@ -563,7 +563,22 @@ void execute_single_command(char **args) {
   
   } else if(strcmp(args[0], "history") == 0) {
     int start = 0;
-    if (args[1] != NULL) {
+    if (strcmp(args[1], "-r") == 0) {
+      FILE *file = fopen(args[2], "r");
+      if (file == NULL) {
+        fprintf(stderr, "history: %s: No such file or directory\n", args[2]);
+        continue;
+      }
+      char fline[1024];
+      while (fgets(fline, sizeof(fline), file) != NULL) {
+        fline[strcspn(fline, "\r\n")] = '\0';
+        if (fline[0] != '\0') {
+          add_history(fline);
+          add_cmd_history(fline);
+        }
+      }
+      fclose(file);
+    } else if (args[1] != NULL) {
       int limit = atoi(args[1]);
       if (limit > 0) {
         start = history.count - limit;
@@ -844,7 +859,22 @@ int main(int argc, char *words[]) {
     
     } else if(strcmp(args[0], "history") == 0){
       int start = 0;
-      if (args[1] != NULL) {
+      if (strcmp(args[1], "-r") == 0) {
+        FILE *file = fopen(args[2], "r");
+        if (file == NULL) {
+          fprintf(stderr, "history: %s: No such file or directory\n", args[2]);
+          continue;
+        }
+        char fline[1024];
+        while (fgets(fline, sizeof(fline), file) != NULL) {
+          fline[strcspn(fline, "\r\n")] = '\0';
+          if (fline[0] != '\0') {
+            add_history(fline);
+            add_cmd_history(fline);
+          }
+        }
+        fclose(file);
+      } else if (args[1] != NULL){
         int limit = atoi(args[1]);
         if (limit > 0) {
           start = history.count - limit;
