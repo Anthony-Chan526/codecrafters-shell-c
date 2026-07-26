@@ -686,7 +686,7 @@ int main(int argc, char *words[]) {
 
   using_history();
   rl_attempted_completion_function = command_completion;
-  read_history(getenv("HISTFILE"));
+  read_history_file(getenv("HISTFILE"));
 
   while (1) {
     reap_background_jobs();
@@ -878,7 +878,7 @@ int main(int argc, char *words[]) {
     } else if(strcmp(args[0], "history") == 0){
       if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
         if (args[2] == NULL) { continue; }
-        read_history(args[2]);
+        read_history_file(args[2]);
       } else if (args[1] != NULL && strcmp(args[1], "-w") == 0) {
         if (args[2] == NULL) { continue; }
         FILE *file = fopen(args[2], "w");
