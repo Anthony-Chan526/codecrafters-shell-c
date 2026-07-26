@@ -575,7 +575,6 @@ void execute_single_command(char **args) {
     exit(EXIT_SUCCESS);
   
   } else if(strcmp(args[0], "history") == 0) {
-    int start = 0;
     if (strcmp(args[1], "-r") == 0) {
       FILE *file = fopen(args[2], "r");
       if (file == NULL) {
@@ -590,15 +589,18 @@ void execute_single_command(char **args) {
         }
       }
       fclose(file);
-    } else if (args[1] != NULL) {
-      int limit = atoi(args[1]);
-      if (limit > 0) {
-        start = history.count - limit;
-        if (start < 0) { start = 0; }
+    } else {
+      int start = 0;
+      if (args[1] != NULL) {
+        int limit = atoi(args[1]);
+        if (limit > 0) {
+          start = history.count - limit;
+          if (start < 0) { start = 0; }
+        }
       }
-    }
-    for (int i = start; i < history.count; i++) {
-      printf("%d  %s\n", i + 1, history.items[i]);
+      for (int i = start; i < history.count; i++) {
+        printf("%d  %s\n", i + 1, history.items[i]);
+      }
     }
     exit(EXIT_SUCCESS);
 
@@ -857,7 +859,6 @@ int main(int argc, char *words[]) {
       }
     
     } else if(strcmp(args[0], "history") == 0){
-      int start = 0;
       if (strcmp(args[1], "-r") == 0) {
         FILE *file = fopen(args[2], "r");
         if (file == NULL) {
@@ -873,15 +874,18 @@ int main(int argc, char *words[]) {
           }
         }
         fclose(file);
-      } else if (args[1] != NULL){
-        int limit = atoi(args[1]);
-        if (limit > 0) {
-          start = history.count - limit;
-          if (start < 0) { start = 0; }
+      } else {
+        int start = 0;
+        if (args[1] != NULL) {
+          int limit = atoi(args[1]);
+          if (limit > 0) {
+            start = history.count - limit;
+            if (start < 0) { start = 0; }
+          }
         }
-      }
-      for (int i = start; i < history.count; i++) {
-        printf("%d  %s\n", i + 1, history.items[i]);
+        for (int i = start; i < history.count; i++) {
+          printf("%d  %s\n", i + 1, history.items[i]);
+        }
       }
 
     } else { 
