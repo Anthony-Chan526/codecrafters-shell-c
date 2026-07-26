@@ -961,6 +961,6 @@ int main(int argc, char *words[]) {
     close(saved_stdout);
     close(saved_stderr);
   }
-  write_history("HISTFILE");
+  write_history(getenv("HISTFILE"));
   return 0;
 }
