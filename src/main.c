@@ -399,6 +399,19 @@ void print_and_clean_reaped_jobs() {
   }
 }
 
+void add_cmd_history(const char *input) {
+  if (input == NULL || strlen(input) == 0) { return; }
+  if (history.count > 0 && strcmp(history.items[history.count - 1], input) == 0) { return; }
+  if (history.count >= MAX_HISTORY) {
+    free(history.items[0]);
+    for (int i = 0; i < MAX_HISTORY; i++) {
+      history.items[i] = history.items[i + 1];
+    }
+    history.count = MAX_HISTORY - 1; 
+  }
+  history.items[history.count++] = strdup(input);
+}
+
 int split_pipeline(char **args, Command *cmds) {
   int idx = 0;
   int num_cmds = 0;
@@ -643,19 +656,6 @@ void execute_pipeline(Command *cmds, int num_cmds) {
   for (i = 0; i < num_cmds; i++) {
     wait(NULL);
   }
-}
-
-void add_cmd_history(const char *input) {
-  if (input == NULL || strlen(input) == 0) { return; }
-  if (history.count > 0 && strcmp(history.items[history.count - 1], input) == 0) { return; }
-  if (history.count >= MAX_HISTORY) {
-    free(history.items[0]);
-    for (int i = 0; i < MAX_HISTORY; i++) {
-      history.items[i] = history.items[i + 1];
-    }
-    history.count = MAX_HISTORY - 1; 
-  }
-  history.items[history.count++] = strdup(input);
 }
 
 int main(int argc, char *words[]) {
