@@ -883,6 +883,15 @@ int main(int argc, char *words[]) {
           }
           fclose(file);
         }
+      } else if (args[1] != NULL && strcmp(args[1], "-a") == 0) {
+        if (args[2] == NULL) { continue; }
+        FILE *file = fopen(args[2], "a");
+        if (file != NULL) {
+          for (int i = 0; i < history.count; i++) {
+            fprintf(file, "%s\n", history.items[i]);
+          }
+          fclose(file);
+        }
       } else {
         int start = 0;
         if (args[1] != NULL) {
