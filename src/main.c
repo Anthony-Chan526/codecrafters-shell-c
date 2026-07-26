@@ -404,7 +404,7 @@ void add_cmd_history(const char *input) {
   if (history.count > 0 && strcmp(history.items[history.count - 1], input) == 0) { return; }
   if (history.count >= MAX_HISTORY) {
     free(history.items[0]);
-    for (int i = 0; i < MAX_HISTORY; i++) {
+    for (int i = 0; i < MAX_HISTORY - 1; i++) {
       history.items[i] = history.items[i + 1];
     }
     history.count = MAX_HISTORY - 1; 
@@ -574,8 +574,8 @@ void execute_single_command(char **args) {
     }
     exit(EXIT_SUCCESS);
   
-  } else if(strcmp(args[0], "history") == 0) {
-    if (strcmp(args[1], "-r") == 0) {
+  } else if(strcmp(args[0], "history") == 0){
+    if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
       FILE *file = fopen(args[2], "r");
       if (file == NULL) {
         fprintf(stderr, "history: %s: No such file or directory\n", args[2]);
@@ -678,7 +678,7 @@ int main(int argc, char *words[]) {
     if (line == NULL) { 
       break; 
     }
-    if (line != "\0") {
+    if (line[0] != '\0') {
       add_history(line);
       add_cmd_history(line);
     }
@@ -859,7 +859,7 @@ int main(int argc, char *words[]) {
       }
     
     } else if(strcmp(args[0], "history") == 0){
-      if (strcmp(args[1], "-r") == 0) {
+      if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
         FILE *file = fopen(args[2], "r");
         if (file == NULL) {
           fprintf(stderr, "history: %s: No such file or directory\n", args[2]);
