@@ -413,7 +413,7 @@ void add_cmd_history(const char *input) {
   history.items[history.count++] = strdup(input);
 }
 
-void read_history(const char *path) {
+void read_history_file(const char *path) {
   FILE *file = fopen(path, "r");
   if (file == NULL) { return; }
   char fline[1024];
