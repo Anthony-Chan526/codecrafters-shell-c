@@ -413,6 +413,20 @@ void add_cmd_history(const char *input) {
   history.items[history.count++] = strdup(input);
 }
 
+void read_history(const char *path) {
+  FILE *file = fopen(path, "r");
+  if (file == NULL) { return; }
+  char fline[1024];
+  while (fgets(fline, sizeof(fline), file) != NULL) {
+    fline[strcspn(fline, "\r\n")] = '\0';
+    if (fline[0] != '\0') {
+      add_history(fline);
+      add_cmd_history(fline);
+    }
+  }
+  fclose(file);
+} 
+
 int split_pipeline(char **args, Command *cmds) {
   int idx = 0;
   int num_cmds = 0;
@@ -672,6 +686,7 @@ int main(int argc, char *words[]) {
 
   using_history();
   rl_attempted_completion_function = command_completion;
+  read_history(getenv("HISTFILE"))
 
   while (1) {
     reap_background_jobs();
@@ -863,18 +878,7 @@ int main(int argc, char *words[]) {
     } else if(strcmp(args[0], "history") == 0){
       if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
         if (args[2] == NULL) { continue; }
-        FILE *file = fopen(args[2], "r");
-        if (file != NULL) { 
-          char fline[1024];
-          while (fgets(fline, sizeof(fline), file) != NULL) {
-            fline[strcspn(fline, "\r\n")] = '\0';
-            if (fline[0] != '\0') {
-              add_history(fline);
-              add_cmd_history(fline);
-            }
-          }
-          fclose(file);
-        }
+        read_history(args[2]);
       } else if (args[1] != NULL && strcmp(args[1], "-w") == 0) {
         if (args[2] == NULL) { continue; }
         FILE *file = fopen(args[2], "w");
