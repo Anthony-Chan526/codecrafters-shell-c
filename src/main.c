@@ -961,5 +961,6 @@ int main(int argc, char *words[]) {
     close(saved_stdout);
     close(saved_stderr);
   }
+  history_save();
   return 0;
 }
