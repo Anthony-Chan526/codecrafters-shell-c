@@ -686,7 +686,7 @@ int main(int argc, char *words[]) {
 
   using_history();
   rl_attempted_completion_function = command_completion;
-  read_history(getenv("HISTFILE"))
+  read_history(getenv("HISTFILE"));
 
   while (1) {
     reap_background_jobs();
