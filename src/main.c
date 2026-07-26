@@ -874,7 +874,7 @@ int main(int argc, char *words[]) {
           }
           fclose(file);
         }
-      } else if (args[1] != NULL && stcmp(args[1], "-w") == 0) {
+      } else if (args[1] != NULL && strcmp(args[1], "-w") == 0) {
         if (args[2] == NULL) { continue; }
         FILE *file = fopen(args[2], "w");
         if (file != NULL) {
