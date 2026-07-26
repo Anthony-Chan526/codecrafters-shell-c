@@ -51,6 +51,7 @@ typedef struct {
 } History;
 
 History history = { .count = 0 };
+int append_idx = 0;
 
 static char **command_matches = NULL;
 static int match_count = 0;
@@ -887,7 +888,7 @@ int main(int argc, char *words[]) {
         if (args[2] == NULL) { continue; }
         FILE *file = fopen(args[2], "a");
         if (file != NULL) {
-          for (int i = 0; i < history.count; i++) {
+          for (int i = append_idx; i < history.count; i++) {
             fprintf(file, "%s\n", history.items[i]);
           }
           fclose(file);
