@@ -892,6 +892,7 @@ int main(int argc, char *words[]) {
             fprintf(file, "%s\n", history.items[i]);
           }
           fclose(file);
+          append_idx = history.count;
         }
       } else {
         int start = 0;
