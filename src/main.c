@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-char *builtins[] = {"exit", "echo", "type", "pwd", "cd", "complete", "jobs", "history", NULL};
+char *builtins[] = {"exit", "echo", "type", "pwd", "cd", "complete", "jobs", "history", "declare", NULL};
 
 typedef struct {
   char *command_name;
@@ -52,6 +52,14 @@ typedef struct {
 
 History history = { .count = 0 };
 int append_idx = 0;
+
+typedef struct {
+  char *name;
+  char *value;
+} Variable;
+
+Variable vars[64];
+int var_count = 0;
 
 static char **command_matches = NULL;
 static int match_count = 0;
@@ -425,6 +433,7 @@ void read_history_file(const char *path) {
     }
   }
   fclose(file);
+  append_idx = history.count;
 } 
 
 int split_pipeline(char **args, Command *cmds) {
@@ -466,7 +475,8 @@ void execute_single_command(char **args) {
         strcmp(args[1], "cd") == 0 ||
         strcmp(args[1], "complete") == 0 ||
         strcmp(args[1], "jobs") == 0 ||
-        strcmp(args[1], "history") == 0) {
+        strcmp(args[1], "history") == 0 ||
+        strcmp(args[1], "declare") == 0) {
           printf("%s is a shell builtin\n", args[1]);
     } else {
       char full_path[PATH_MAX];
@@ -591,20 +601,31 @@ void execute_single_command(char **args) {
   
   } else if(strcmp(args[0], "history") == 0){
     if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
-      FILE *file = fopen(args[2], "r");
-      if (file == NULL) {
-        fprintf(stderr, "history: %s: No such file or directory\n", args[2]);
-        exit(EXIT_SUCCESS);
+      if (args[2] != NULL) { 
+        read_history_file(args[2]); 
       }
-      char fline[1024];
-      while (fgets(fline, sizeof(fline), file) != NULL) {
-        fline[strcspn(fline, "\r\n")] = '\0';
-        if (fline[0] != '\0') {
-          add_history(fline);
-          add_cmd_history(fline);
+    } else if (args[1] != NULL && strcmp(args[1], "-w") == 0) {
+      if (args[2] != NULL) {
+        FILE *file = fopen(args[2], "w");
+        if (file != NULL) {
+          for (int i = 0; i < history.count; i++) {
+            fprintf(file, "%s\n", history.items[i]);
+          }
+          fclose(file);
+          append_idx = history.count;
         }
       }
-      fclose(file);
+    } else if (args[1] != NULL && strcmp(args[1], "-a") == 0) {
+      if (args[2] != NULL) {
+        FILE *file = fopen(args[2], "a");
+        if (file != NULL) {
+          for (int i = append_idx; i < history.count; i++) {
+            fprintf(file, "%s\n", history.items[i]);
+          }
+          fclose(file);
+          append_idx = history.count;
+        }
+      }
     } else {
       int start = 0;
       if (args[1] != NULL) {
@@ -757,7 +778,8 @@ int main(int argc, char *words[]) {
           strcmp(args[1], "cd") == 0 ||
           strcmp(args[1], "complete") == 0 ||
           strcmp(args[1], "jobs") == 0 ||
-          strcmp(args[1], "history") == 0) {
+          strcmp(args[1], "history") == 0 ||
+          strcmp(args[1], "declare") == 0) {
         printf("%s is a shell builtin\n", args[1]);
       } else {
         char full_path[PATH_MAX];
@@ -877,26 +899,30 @@ int main(int argc, char *words[]) {
     
     } else if(strcmp(args[0], "history") == 0){
       if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
-        if (args[2] == NULL) { continue; }
-        read_history_file(args[2]);
+        if (args[2] != NULL) {
+          read_history_file(args[2]);
+        }
       } else if (args[1] != NULL && strcmp(args[1], "-w") == 0) {
-        if (args[2] == NULL) { continue; }
-        FILE *file = fopen(args[2], "w");
-        if (file != NULL) {
-          for (int i = 0; i < history.count; i++) {
-            fprintf(file, "%s\n", history.items[i]);
+        if (args[2] != NULL) {
+          FILE *file = fopen(args[2], "w");
+          if (file != NULL) {
+            for (int i = 0; i < history.count; i++) {
+              fprintf(file, "%s\n", history.items[i]);
+            }
+            fclose(file);
+            append_idx = history.count;
           }
-          fclose(file);
         }
       } else if (args[1] != NULL && strcmp(args[1], "-a") == 0) {
-        if (args[2] == NULL) { continue; }
-        FILE *file = fopen(args[2], "a");
-        if (file != NULL) {
-          for (int i = append_idx; i < history.count; i++) {
-            fprintf(file, "%s\n", history.items[i]);
+        if (args[2] != NULL) {
+          FILE *file = fopen(args[2], "a");
+          if (file != NULL) {
+            for (int i = append_idx; i < history.count; i++) {
+              fprintf(file, "%s\n", history.items[i]);
+            }
+            fclose(file);
+            append_idx = history.count;
           }
-          fclose(file);
-          append_idx = history.count;
         }
       } else {
         int start = 0;
@@ -910,6 +936,26 @@ int main(int argc, char *words[]) {
         for (int i = start; i < history.count; i++) {
           printf("%d  %s\n", i + 1, history.items[i]);
         }
+      }
+    
+    } else if(strcmp(args[0], "declare") == 0){
+      if (strcmp(args[1], "-p") == 0) {
+        int found = 0;
+        for (int i = 0; i < var_count; i++) {
+          if (strcmp(args[2], vars[i].name) == 0) {
+            printf("declare -- %s=\"%s\"", vars[i].name, vars[i].value);
+            found = 1;
+            break;
+          }
+        }
+        if (!found) {
+          fprintf(stderr, "declare: %s: not found", args[2])
+        }
+      } else {
+        if (strchr(args[2], '=') != NULL) {
+          vars[var_count].name = strtok(args[2], "=");
+          vars[var_count].value = strtok(NULL, "=");
+          var_count++;
       }
 
     } else { 
