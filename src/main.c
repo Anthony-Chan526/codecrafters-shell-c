@@ -530,7 +530,7 @@ int split_pipeline(char **args, Command *cmds) {
   return num_cmds;
 }
 
-void execute_builtins(char **args) {
+int execute_builtins(char **args) {
   if (args[0] == NULL) { return 1; }
   if (strcmp(args[0], "exit") == 0) { return 0; }
     
