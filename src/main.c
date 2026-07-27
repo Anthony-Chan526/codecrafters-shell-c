@@ -940,7 +940,7 @@ int main(int argc, char *words[]) {
     
     } else if(strcmp(args[0], "declare") == 0){
       int found = 0;
-      if (strcmp(args[1], "-p") == 0) {
+      if (strcmp(args[1], "-p") == 0 && args[2] != NULL) {
         for (int i = 0; i < var_count; i++) {
           if (strcmp(args[2], vars[i].name) == 0) {
             printf("declare -- %s=\"%s\"\n", vars[i].name, vars[i].value);
@@ -952,18 +952,22 @@ int main(int argc, char *words[]) {
           fprintf(stderr, "declare: %s: not found\n", args[2]);
         }
       } else {
-        if (strchr(args[1], '=') != NULL) {
-          char *name = strtok(args[1], "=");
-          char *value = strtok(NULL, "=");
+        *eq = strchr(args[1], '=');
+        if (eq != NULL) {
+          *eq = '\0';
+          char *name = args[1];
+          char *value = eq + 1;
           for (int i = 0; i < var_count; i++) {
             if (strcmp(vars[i].name, name) == 0) {
-              vars[i].value = value;
+              free(vars[i].value);
+              vars[i].value = strdup(value);
               found = 1;
+              break;
             }
           }
           if (!found) {
-            vars[var_count].name = name;
-            vars[var_count].value = value;
+            vars[var_count].name = strdup(name);
+            vars[var_count].value = strdup(value);
             var_count++; 
           }
         }
