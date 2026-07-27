@@ -988,7 +988,7 @@ int main(int argc, char *words[]) {
               var_count++; 
             }
           } else {
-            fprintf(stderr, "declare: `%s=%s': not a valid identifier", name, value);
+            fprintf(stderr, "declare: `%s=%s': not a valid identifier\n", name, value);
           }
         }
       }
