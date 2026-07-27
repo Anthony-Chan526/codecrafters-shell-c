@@ -436,6 +436,21 @@ void read_history_file(const char *path) {
   append_idx = history.count;
 } 
 
+int is_valid_var_name(const char *name) {
+  if (name == NULL || *name == '\0') {
+    return 0;
+  }
+  if(!isalpha((unsigned char)*name) && *name != '_') {
+    return 0;
+  }
+  for (size_t i = 1; name[i] != '\0'; i++) {
+    if (!isalnum((unsigned char)name[i]) && name[i] != '_') {
+      return 0; 
+    }
+  }
+  return 1;
+}
+
 int split_pipeline(char **args, Command *cmds) {
   int idx = 0;
   int num_cmds = 0;
@@ -958,18 +973,22 @@ int main(int argc, char *words[]) {
           *eq = '\0';
           char *name = args[1];
           char *value = eq + 1;
-          for (int i = 0; i < var_count; i++) {
-            if (strcmp(vars[i].name, name) == 0) {
-              free(vars[i].value);
-              vars[i].value = strdup(value);
-              found = 1;
-              break;
+          if (is_valid_var_name) {
+            for (int i = 0; i < var_count; i++) {
+              if (strcmp(vars[i].name, name) == 0) {
+                free(vars[i].value);
+                vars[i].value = strdup(value);
+                found = 1;
+                break;
+              }
             }
-          }
-          if (!found) {
-            vars[var_count].name = strdup(name);
-            vars[var_count].value = strdup(value);
-            var_count++; 
+            if (!found) {
+              vars[var_count].name = strdup(name);
+              vars[var_count].value = strdup(value);
+              var_count++; 
+            }
+          } else {
+            fprintf(stderr, "declare: `%s=%s': not a valid identifier", name, value);
           }
         }
       }
