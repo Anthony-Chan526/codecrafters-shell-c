@@ -953,8 +953,8 @@ int main(int argc, char *words[]) {
         }
       } else {
         if (strchr(args[1], '=') != NULL) {
-          *name = strtok(args[1], "=");
-          *value = strtok(NULL, "=");
+          char *name = strtok(args[1], "=");
+          char *value = strtok(NULL, "=");
           for (int i = 0; i < var_count; i++) {
             if (strcmp(vars[i].name, name) == 0) {
               vars[i].value = value;
