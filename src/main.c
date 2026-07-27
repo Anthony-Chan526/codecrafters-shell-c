@@ -256,7 +256,9 @@ char **command_completion(const char *text, int start, int end) {
 }
 
 int find_path(const char *arg, char *full_path) {
-  char *path = strdup(getenv("PATH"));
+  const char *env_path = getenv("PATH");
+  if (!env_path) return 0;
+  char *path = strdup(env_path);
   char *dir = strtok(path, ":");
   while (dir != NULL) {
     snprintf(full_path, PATH_MAX, "%s/%s", dir, arg);
@@ -374,7 +376,8 @@ void reap_background_jobs() {
 }
 
 void add_job_history(int idx) {
-  for (int i = job_count; i > 0; i--) {
+  int start = (job_count < MAX_JOBS - 1) ? job_count : MAX_JOBS - 1;
+  for (int i = start; i > 0; i--) {
     job_history[i] = job_history[i - 1];
   }
   job_history[0] = idx;
@@ -755,7 +758,7 @@ void execute_single_command(char **args) {
       }
     }
     exit(EXIT_SUCCESS);
-    
+
   } else { 
     char full_path[PATH_MAX];
     if (find_path(args[0], full_path)) {
@@ -876,7 +879,13 @@ int main(int argc, char *words[]) {
       continue;
     }
 
-    if (strcmp(args[0], "exit") == 0) { break; }
+    if (strcmp(args[0], "exit") == 0) { 
+      dup2(saved_stdout, STDOUT_FILENO);
+      dup2(saved_stderr, STDERR_FILENO);
+      close(saved_stdout);
+      close(saved_stderr);
+      break; 
+    }
     
     else if (strcmp(args[0], "echo") == 0) {
       for (int i = 1; args[i] != NULL; i++) {
@@ -1144,6 +1153,9 @@ int main(int argc, char *words[]) {
     close(saved_stdout);
     close(saved_stderr);
   }
-  write_history(getenv("HISTFILE"));
+  const char *hfile = getenv("HISTFILE");
+  if(hfile && *hfile != '\0') {
+    write_history(hfile);
+  }
   return 0;
 }
