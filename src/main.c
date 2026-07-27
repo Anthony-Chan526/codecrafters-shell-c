@@ -830,7 +830,10 @@ int main(int argc, char *words[]) {
 
   using_history();
   rl_attempted_completion_function = command_completion;
-  read_history_file(getenv("HISTFILE"));
+  const char *hfile = getenv("HISTFILE");
+  if (hfile && *hfile != '\0') {
+      read_history_file(hfile);
+  }
 
   while (1) {
     reap_background_jobs();
@@ -852,6 +855,7 @@ int main(int argc, char *words[]) {
     free(line);
 
     parse_input(input, args, 64);
+    if (args[0] == NULL) { continue; }
 
     int saved_stdout = dup(STDOUT_FILENO);
     int saved_stderr = dup(STDERR_FILENO);
