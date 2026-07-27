@@ -715,6 +715,45 @@ void execute_single_command(char **args) {
     }
     exit(EXIT_SUCCESS);
 
+  } else if (strcmp(args[0], "declare") == 0) {
+    if (strcmp(args[1], "-p") == 0 && args[2] != NULL) {
+      int found = 0;
+      for (int i = 0; i < var_count; i++) {
+        if (strcmp(args[2], vars[i].name) == 0) {
+          printf("declare -- %s=\"%s\"\n", vars[i].name, vars[i].value);
+          found = 1;
+          break;
+        }
+      }
+      if (!found) {
+        fprintf(stderr, "declare: %s: not found\n", args[2]);
+      }
+    } else {
+      int found = 0;
+      char *eq = strchr(args[1], '=');
+      if (eq != NULL) {
+        *eq = '\0';
+        char *name = args[1];
+        char *value = eq + 1;
+        if (is_valid_var_name(name)) {
+          for (int i = 0; i < var_count; i++) {
+            if (strcmp(vars[i].name, name) == 0) {
+              free(vars[i].value);
+              vars[i].value = strdup(value);
+              found = 1;
+              break;
+            }
+          }
+          if (!found) {
+            vars[var_count].name = strdup(name);
+            vars[var_count].value = strdup(value);
+            var_count++; 
+          }
+        } else {
+          fprintf(stderr, "declare: `%s=%s': not a valid identifier\n", name, value);
+        }
+      }
+    }
   } else { 
     char full_path[PATH_MAX];
     if (find_path(args[0], full_path)) {
@@ -1014,7 +1053,7 @@ int main(int argc, char *words[]) {
         }
       }
     
-    } else if(strcmp(args[0], "declare") == 0){
+    } else if(strcmp(args[0], "declare") == 0) {
       if (strcmp(args[1], "-p") == 0 && args[2] != NULL) {
         int found = 0;
         for (int i = 0; i < var_count; i++) {
