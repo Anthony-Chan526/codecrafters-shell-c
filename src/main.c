@@ -973,7 +973,7 @@ int main(int argc, char *words[]) {
           *eq = '\0';
           char *name = args[1];
           char *value = eq + 1;
-          if (is_valid_var_name) {
+          if (is_valid_var_name(name)) {
             for (int i = 0; i < var_count; i++) {
               if (strcmp(vars[i].name, name) == 0) {
                 free(vars[i].value);
