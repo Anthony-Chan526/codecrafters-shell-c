@@ -9,6 +9,11 @@
 #include <readline/history.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <ctype.h>
+
+#define MAX_JOBS 32
+#define MAX_HISTORY 1000
+#define MAX_INPUT_LEN 1024
 
 char *builtins[] = {"exit", "echo", "type", "pwd", "cd", "complete", "jobs", "history", "declare", NULL};
 
@@ -20,7 +25,6 @@ typedef struct {
 Completion completion_registry[100];
 int completion_count = 0;  
 
-#define MAX_JOBS 32
 typedef enum {
   EMPTY = 0,
   RUNNING,
@@ -44,7 +48,6 @@ typedef struct {
 
 Command cmds[16];
 
-#define MAX_HISTORY 1000
 typedef struct {
     char *items[MAX_HISTORY];
     int count;
@@ -451,6 +454,62 @@ int is_valid_var_name(const char *name) {
   return 1;
 }
 
+char *expand_variables(const char *input) {
+  char buffer[MAX_INPUT_LEN] = {0};
+  int b_idx = 0;
+  int i = 0;
+  int len = strlen(input);
+
+  while (i < len) {
+    if (input[i] == '$') {
+      i++;
+
+      if (i >= len || (!isalpha(input[i]) && input[i] != '_' && input[i] != '{')) {
+        buffer[b_idx++] = '$';
+        continue;
+      }
+
+      char var_name[256] = {0};
+      int v_idx = 0;
+
+      if (input[i] == '{') {
+        i++;
+        while (i < len && input[i] != '}') {
+          var_name[v_idx++] = input[i++];
+        }
+        if (i < len && input[i] == '}') {
+          i++;
+        }
+      } else {
+        while (i < len && (isalnum(input[i]) || input[i] == '_')) {
+          var_name[v_idx++] = input[i++];
+        }
+      }
+      const char *value = NULL;
+      for (int j = 0; j < var_count; j++) {
+        if (strcmp(vars[j].name, var_name) == 0) {
+          value = vars[j].value;
+          break;
+        }
+      }
+      if (value == NULL) {
+        value = getenv(var_name);
+      }
+      if (value != NULL) {
+        int val_len = strlen(value);
+        if (b_idx + val_len < (int)sizeof(buffer) - 1) {
+          strcpy(buffer + b_idx, value);
+          b_idx += val_len;
+        }
+      }
+    } else {
+      buffer[b_idx++] = input[i++];
+    }
+  }
+  buffer[b_idx] = '\0';
+  return strdup(buffer);
+}
+
 int split_pipeline(char **args, Command *cmds) {
   int idx = 0;
   int num_cmds = 0;
@@ -717,8 +776,8 @@ int main(int argc, char *words[]) {
   setbuf(stdout, NULL);
 
   char *args[64];
-  char input[1024];
-  char input_copy[1024];
+  char input[MAX_INPUT_LEN];
+  char input_copy[MAX_INPUT_LEN];
 
   using_history();
   rl_attempted_completion_function = command_completion;
@@ -735,10 +794,12 @@ int main(int argc, char *words[]) {
       add_history(line);
       add_cmd_history(line);
     }
-    strncpy(input, line, sizeof(input) - 1);
+    char *expanded_line = expand_variables(line);
+    strncpy(input, expanded_line, sizeof(input) - 1);
     input[sizeof(input) - 1] = '\0';
-    strncpy(input_copy, line, sizeof(input) - 1);
+    strncpy(input_copy, expanded_line, sizeof(input) - 1);
     input_copy[sizeof(input) - 1] = '\0';
+    free(expanded_line);
     free(line);
 
     parse_input(input, args, 64);
