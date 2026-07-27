@@ -939,8 +939,8 @@ int main(int argc, char *words[]) {
       }
     
     } else if(strcmp(args[0], "declare") == 0){
+      int found = 0;
       if (strcmp(args[1], "-p") == 0) {
-        int found = 0;
         for (int i = 0; i < var_count; i++) {
           if (strcmp(args[2], vars[i].name) == 0) {
             printf("declare -- %s=\"%s\"\n", vars[i].name, vars[i].value);
@@ -953,9 +953,19 @@ int main(int argc, char *words[]) {
         }
       } else {
         if (strchr(args[1], '=') != NULL) {
-          vars[var_count].name = strtok(args[1], "=");
-          vars[var_count].value = strtok(NULL, "=");
-          var_count++;
+          *name = strtok(args[1], "=");
+          *value = strtok(NULL, "=");
+          for (int i = 0; i < var_count; i++) {
+            if (strcmp(vars[i].name, name) == 0) {
+              vars[i].value = value;
+              found = 1;
+            }
+          }
+          if (!found) {
+            vars[var_count].name = name;
+            vars[var_count].value = value;
+            var_count++; 
+          }
         }
       }
 
