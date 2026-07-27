@@ -939,8 +939,8 @@ int main(int argc, char *words[]) {
       }
     
     } else if(strcmp(args[0], "declare") == 0){
-      int found = 0;
       if (strcmp(args[1], "-p") == 0 && args[2] != NULL) {
+        int found = 0;
         for (int i = 0; i < var_count; i++) {
           if (strcmp(args[2], vars[i].name) == 0) {
             printf("declare -- %s=\"%s\"\n", vars[i].name, vars[i].value);
@@ -952,7 +952,8 @@ int main(int argc, char *words[]) {
           fprintf(stderr, "declare: %s: not found\n", args[2]);
         }
       } else {
-        *eq = strchr(args[1], '=');
+        int found = 0;
+        char *eq = strchr(args[1], '=');
         if (eq != NULL) {
           *eq = '\0';
           char *name = args[1];
