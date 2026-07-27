@@ -830,9 +830,9 @@ int main(int argc, char *words[]) {
 
   using_history();
   rl_attempted_completion_function = command_completion;
-  const char *rfile = getenv("HISTFILE");
-  if (rfile && *rfile != '\0') {
-      read_history_file(rfile);
+  const char *hfile = getenv("HISTFILE");
+  if (hfile && *hfile != '\0') {
+      read_history_file(hfile);
   }
 
   while (1) {
@@ -951,9 +951,8 @@ int main(int argc, char *words[]) {
     close(saved_stdout);
     close(saved_stderr);
   }
-  const char *wfile = getenv("HISTFILE");
-  if(wfile && *wfile != '\0') {
-    write_history(wfile);
+  if(hfile && *hfile != '\0') {
+    write_history(hfile);
   }
   return 0;
 }
