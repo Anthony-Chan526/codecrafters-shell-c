@@ -943,13 +943,13 @@ int main(int argc, char *words[]) {
         int found = 0;
         for (int i = 0; i < var_count; i++) {
           if (strcmp(args[2], vars[i].name) == 0) {
-            printf("declare -- %s=\"%s\"", vars[i].name, vars[i].value);
+            printf("declare -- %s=\"%s\"\n", vars[i].name, vars[i].value);
             found = 1;
             break;
           }
         }
         if (!found) {
-          fprintf(stderr, "declare: %s: not found", args[2]);
+          fprintf(stderr, "declare: %s: not found\n", args[2]);
         }
       } else {
         if (strchr(args[1], '=') != NULL) {
