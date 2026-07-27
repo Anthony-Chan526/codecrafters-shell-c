@@ -754,6 +754,8 @@ void execute_single_command(char **args) {
         }
       }
     }
+    exit(EXIT_SUCCESS);
+    
   } else { 
     char full_path[PATH_MAX];
     if (find_path(args[0], full_path)) {
@@ -1012,7 +1014,7 @@ int main(int argc, char *words[]) {
         }
       }
     
-    } else if(strcmp(args[0], "history") == 0){
+    } else if(strcmp(args[0], "history") == 0) {
       if (args[1] != NULL && strcmp(args[1], "-r") == 0) {
         if (args[2] != NULL) {
           read_history_file(args[2]);
