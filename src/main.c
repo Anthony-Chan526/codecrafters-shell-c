@@ -949,13 +949,14 @@ int main(int argc, char *words[]) {
           }
         }
         if (!found) {
-          fprintf(stderr, "declare: %s: not found", args[2])
+          fprintf(stderr, "declare: %s: not found", args[2]);
         }
       } else {
-        if (strchr(args[2], '=') != NULL) {
-          vars[var_count].name = strtok(args[2], "=");
+        if (strchr(args[1], '=') != NULL) {
+          vars[var_count].name = strtok(args[1], "=");
           vars[var_count].value = strtok(NULL, "=");
           var_count++;
+        }
       }
 
     } else { 
